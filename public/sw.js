@@ -5,7 +5,7 @@ const PRECACHE_ASSETS = ["/", "/manifest.webmanifest"]
 
 self.addEventListener("install", (event) => {
 	event.waitUntil(
-		caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_ASSETS)),
+		caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_ASSETS))
 	)
 	// Activate immediately without waiting for existing tabs to close
 	self.skipWaiting()
@@ -18,9 +18,9 @@ self.addEventListener("activate", (event) => {
 			.keys()
 			.then((keys) =>
 				Promise.all(
-					keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)),
-				),
-			),
+					keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))
+				)
+			)
 	)
 	self.clients.claim()
 })
@@ -49,8 +49,8 @@ self.addEventListener("fetch", (event) => {
 						const clone = res.clone()
 						caches.open(CACHE_NAME).then((cache) => cache.put(request, clone))
 						return res
-					}),
-			),
+					})
+			)
 		)
 		return
 	}
@@ -64,10 +64,9 @@ self.addEventListener("fetch", (event) => {
 					caches.open(CACHE_NAME).then((cache) => cache.put(request, clone))
 					return res
 				})
-				.catch(
-					() =>
-						caches.match(request).then((cached) => cached ?? caches.match("/")),
-				),
+				.catch(() =>
+					caches.match(request).then((cached) => cached ?? caches.match("/"))
+				)
 		)
 	}
 })

@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import {
 	Gauge,
@@ -6,44 +6,46 @@ import {
 	Navigation,
 	Radar,
 	ShieldAlert,
-} from "lucide-react";
+	Smartphone,
+} from "lucide-react"
 
-import { cn } from "@/lib/utils";
-import { useChromeSpeedometer } from "./useChromeSpeedometer";
+import { cn } from "@/lib/utils"
+import { useChromeSpeedometer } from "./useChromeSpeedometer"
+import { usePWAInstall } from "./usePWAInstall"
 
 function formatSpeed(value: number) {
 	return new Intl.NumberFormat("en-US", {
 		maximumFractionDigits: value >= 10 ? 0 : 1,
 		minimumFractionDigits: value >= 10 ? 0 : 1,
-	}).format(value);
+	}).format(value)
 }
 
 function formatCoordinate(value: number | null) {
 	if (value === null) {
-		return "—";
+		return "—"
 	}
 
-	return value.toFixed(6);
+	return value.toFixed(6)
 }
 
 function formatAccuracy(value: number | null) {
 	if (value === null) {
-		return "—";
+		return "—"
 	}
 
-	return `${Math.round(value)} m`;
+	return `${Math.round(value)} m`
 }
 
 function formatUpdatedAt(value: number | null) {
 	if (value === null) {
-		return "Waiting for data";
+		return "Waiting for data"
 	}
 
 	return new Intl.DateTimeFormat("en-US", {
 		hour: "2-digit",
 		minute: "2-digit",
 		second: "2-digit",
-	}).format(value);
+	}).format(value)
 }
 
 const signalMap = {
@@ -59,11 +61,17 @@ const signalMap = {
 		label: "GPS OK",
 		className: "border-emerald-500/30 bg-emerald-500/10 text-emerald-200",
 	},
-} as const;
+} as const
 
 export function SpeedometerMVP() {
-	const speedometer = useChromeSpeedometer();
-	const signal = signalMap[speedometer.signal];
+	const speedometer = useChromeSpeedometer()
+	const signal = signalMap[speedometer.signal]
+	const pwa = usePWAInstall()
+
+	const showInstallBanner =
+		pwa.state === "available" && !pwa.isIOS
+	const showIOSBanner =
+		pwa.state === "available" && pwa.isIOS
 
 	return (
 		<main className="min-h-svh overflow-hidden bg-[radial-gradient(circle_at_top,rgba(94,234,212,0.18),transparent_28%),linear-gradient(180deg,#07111a_0%,#02060a_100%)] text-slate-50">
@@ -72,7 +80,7 @@ export function SpeedometerMVP() {
 					<div
 						className={cn(
 							"inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-medium uppercase tracking-[0.28em]",
-							signal.className,
+							signal.className
 						)}
 					>
 						<Radar className="size-3.5" />
@@ -132,6 +140,16 @@ export function SpeedometerMVP() {
 							>
 								Stop tracking
 							</button>
+							{showInstallBanner && (
+								<button
+									type="button"
+									onClick={pwa.install}
+									className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl border border-violet-400/30 bg-violet-400/10 px-5 text-sm font-medium text-violet-100 transition hover:border-violet-300/60 hover:bg-violet-400/20"
+								>
+									<Smartphone className="size-4" />
+									Install app
+								</button>
+							)}
 						</div>
 
 						<div className="flex items-center justify-between rounded-[1.7rem] border border-white/10 bg-black/20 px-4 py-3 text-xs uppercase tracking-[0.28em] text-slate-400">
@@ -153,6 +171,19 @@ export function SpeedometerMVP() {
 						) : null}
 					</div>
 				</section>
+
+				{showIOSBanner && (
+					<div className="rounded-[2rem] border border-violet-400/20 bg-violet-400/10 p-5 text-sm text-violet-100">
+						<div className="mb-2 inline-flex items-center gap-2 font-medium">
+							<Smartphone className="size-4" />
+							<span>Install on iOS</span>
+						</div>
+						<p className="text-slate-300">
+							Tap the <strong>Share</strong> button in Safari, then{" "}
+							<strong>Add to Home Screen</strong>.
+						</p>
+					</div>
+				)}
 
 				<section className="grid gap-4 pb-4">
 					<div className="rounded-[2rem] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
@@ -213,5 +244,5 @@ export function SpeedometerMVP() {
 				</section>
 			</div>
 		</main>
-	);
+	)
 }

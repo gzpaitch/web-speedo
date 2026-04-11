@@ -1,13 +1,13 @@
-"use client";
+"use client"
 
-import { useEffect } from "react";
+import { useEffect } from "react"
 
 export function ServiceWorkerRegister() {
 	useEffect(() => {
 		if ("serviceWorker" in navigator) {
-			navigator.serviceWorker.register("/sw.js", { scope: "/" });
+			navigator.serviceWorker.register("/sw.js", { scope: "/" })
 		}
-	}, []);
+	}, [])
 
-	return null;
+	return null
 }

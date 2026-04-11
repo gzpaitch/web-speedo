@@ -1,5 +1,5 @@
-import { SpeedometerMVP } from "./MVP/SpeedometerMVP";
+import { SpeedometerMVP } from "./MVP/SpeedometerMVP"
 
 export default function Page() {
-	return <SpeedometerMVP />;
+	return <SpeedometerMVP />
 }

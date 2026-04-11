@@ -1,18 +1,14 @@
-import { defineConfig, globalIgnores } from "eslint/config";
-import nextVitals from "eslint-config-next/core-web-vitals";
-import nextTs from "eslint-config-next/typescript";
+import { defineConfig, globalIgnores } from "eslint/config"
+import nextVitals from "eslint-config-next/core-web-vitals"
+import nextTs from "eslint-config-next/typescript"
 
+// ESLint handles Next.js/React-specific rules that Biome doesn't cover:
+// react-hooks, jsx-a11y, @next/next rules.
+// Formatting and general TypeScript linting is handled by Biome.
 const eslintConfig = defineConfig([
-  ...nextVitals,
-  ...nextTs,
-  // Override default ignores of eslint-config-next.
-  globalIgnores([
-    // Default ignores of eslint-config-next:
-    ".next/**",
-    "out/**",
-    "build/**",
-    "next-env.d.ts",
-  ]),
-]);
+	...nextVitals,
+	...nextTs,
+	globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts"]),
+])
 
-export default eslintConfig;
+export default eslintConfig

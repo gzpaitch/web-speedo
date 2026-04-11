@@ -1,17 +1,17 @@
-import type { Metadata, Viewport } from "next";
-import { Geist_Mono, Inter } from "next/font/google";
+import type { Metadata, Viewport } from "next"
+import { Geist_Mono, Inter } from "next/font/google"
 
-import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider";
-import { cn } from "@/lib/utils";
-import { ServiceWorkerRegister } from "./sw-register";
+import "./globals.css"
+import { ThemeProvider } from "@/components/theme-provider"
+import { cn } from "@/lib/utils"
+import { ServiceWorkerRegister } from "./sw-register"
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
 
 const fontMono = Geist_Mono({
 	subsets: ["latin"],
 	variable: "--font-mono",
-});
+})
 
 export const metadata: Metadata = {
 	title: "Speedo",
@@ -25,7 +25,10 @@ export const metadata: Metadata = {
 	formatDetection: {
 		telephone: false,
 	},
-};
+	icons: {
+		apple: "/icons/icon-192.png",
+	},
+}
 
 export const viewport: Viewport = {
 	themeColor: [
@@ -37,12 +40,12 @@ export const viewport: Viewport = {
 	maximumScale: 1,
 	userScalable: false,
 	viewportFit: "cover",
-};
+}
 
 export default function RootLayout({
 	children,
 }: Readonly<{
-	children: React.ReactNode;
+	children: React.ReactNode
 }>) {
 	return (
 		<html
@@ -52,7 +55,7 @@ export default function RootLayout({
 				"antialiased",
 				fontMono.variable,
 				"font-sans",
-				inter.variable,
+				inter.variable
 			)}
 		>
 			<body>
@@ -60,5 +63,5 @@ export default function RootLayout({
 				<ServiceWorkerRegister />
 			</body>
 		</html>
-	);
+	)
 }
