@@ -5,16 +5,15 @@ import {
 	CircleCheck,
 	CircleStop,
 	CircleX,
-	Gauge,
 	LocateFixed,
 	MapPin,
 	MapPinOff,
 	Navigation,
-	Radar,
 	RotateCcw,
 	ShieldAlert,
 	Smartphone,
 } from "lucide-react"
+import type React from "react"
 import { useEffect, useState } from "react"
 
 import { cn } from "@/lib/utils"
@@ -98,56 +97,112 @@ function formatUpdatedAt(value: number | null) {
 	}).format(value)
 }
 
-const signalMap = {
+type StatusKey = "stopped" | "waiting" | "weak" | "ok"
+
+const statusBadgeMap: Record<
+	StatusKey,
+	{ dot: string; ring: string | null; label: string; className: string }
+> = {
+	stopped: {
+		dot: "bg-slate-500",
+		ring: null,
+		label: "Stopped",
+		className: "border-white/10 bg-white/5 text-slate-400",
+	},
 	waiting: {
-		label: "Waiting",
+		dot: "bg-amber-400",
+		ring: "bg-amber-400/60",
+		label: "Waiting for GPS",
 		className: "border-amber-500/30 bg-amber-500/10 text-amber-200",
 	},
 	weak: {
+		dot: "bg-orange-400",
+		ring: "bg-orange-400/60",
 		label: "Weak signal",
 		className: "border-orange-500/30 bg-orange-500/10 text-orange-200",
 	},
 	ok: {
-		label: "GPS OK",
+		dot: "bg-emerald-400",
+		ring: "bg-emerald-400/60",
+		label: "Live · GPS OK",
 		className: "border-emerald-500/30 bg-emerald-500/10 text-emerald-200",
 	},
-} as const
+}
 
-const gpsButtonMap = {
-	idle: {
-		label: "Allow GPS",
-		icon: MapPin,
-		className:
-			"border-cyan-300/30 bg-cyan-300/10 text-cyan-50 hover:border-cyan-200/60 hover:bg-cyan-300/20",
-	},
-	prompt: {
-		label: "Allow GPS",
-		icon: MapPin,
-		className:
-			"border-amber-400/30 bg-amber-400/10 text-amber-100 hover:border-amber-300/60 hover:bg-amber-400/20",
-	},
-	granted: {
-		label: "Allow GPS",
-		icon: CircleCheck,
-		className:
-			"border-emerald-500/30 bg-emerald-500/10 text-emerald-100 hover:border-emerald-400/60 hover:bg-emerald-500/20",
-	},
-	denied: {
-		label: "Allow GPS",
-		icon: CircleX,
-		className:
-			"border-rose-400/30 bg-rose-400/10 text-rose-200 hover:border-rose-400/50 hover:bg-rose-400/20",
-	},
-	unsupported: {
-		label: "Allow GPS",
-		icon: MapPinOff,
-		className: "border-white/10 bg-white/5 text-slate-500 cursor-not-allowed",
-	},
-} as const
+type TrackingButtonConfig = {
+	label: string
+	icon: React.ElementType
+	onClick: (() => void) | undefined
+	className: string
+}
+
+function resolveTrackingButton(
+	isWatching: boolean,
+	isRequesting: boolean,
+	permission: "idle" | "prompt" | "granted" | "denied" | "unsupported"
+): TrackingButtonConfig {
+	if (isWatching) {
+		return {
+			label: "Stop tracking",
+			icon: CircleStop,
+			onClick: undefined,
+			className:
+				"border-white/10 bg-white/5 text-slate-100 hover:border-white/20 hover:bg-white/10",
+		}
+	}
+
+	if (isRequesting) {
+		return {
+			label: "Requesting…",
+			icon: MapPin,
+			onClick: undefined,
+			className:
+				"border-amber-400/30 bg-amber-400/10 text-amber-100 cursor-wait",
+		}
+	}
+
+	switch (permission) {
+		case "unsupported":
+			return {
+				label: "GPS unavailable",
+				icon: MapPinOff,
+				onClick: undefined,
+				className:
+					"border-white/10 bg-white/5 text-slate-500 cursor-not-allowed",
+			}
+		case "denied":
+			return {
+				label: "GPS denied — enable in browser settings",
+				icon: CircleX,
+				onClick: undefined,
+				className:
+					"border-rose-400/30 bg-rose-400/10 text-rose-300 cursor-not-allowed",
+			}
+		case "granted":
+			return {
+				label: "Start tracking",
+				icon: CircleCheck,
+				onClick: undefined,
+				className:
+					"border-emerald-500/30 bg-emerald-500/10 text-emerald-100 hover:border-emerald-400/60 hover:bg-emerald-500/20",
+			}
+		default:
+			return {
+				label: "Allow GPS",
+				icon: MapPin,
+				onClick: undefined,
+				className:
+					"border-cyan-300/30 bg-cyan-300/10 text-cyan-50 hover:border-cyan-200/60 hover:bg-cyan-300/20",
+			}
+	}
+}
 
 export function SpeedometerMVP() {
 	const speedometer = useChromeSpeedometer()
-	const signal = signalMap[speedometer.signal]
+	const statusKey: StatusKey = speedometer.isWatching
+		? speedometer.signal
+		: "stopped"
+	const statusBadge = statusBadgeMap[statusKey]
 	const pwa = usePWAInstall()
 	const [detailsEmblaRef, detailsEmblaApi] = useEmblaCarousel({
 		align: "start",
@@ -236,11 +291,31 @@ export function SpeedometerMVP() {
 					<div className="absolute inset-x-6 top-0 h-px bg-linear-to-r from-transparent via-cyan-300/70 to-transparent" />
 					<div className="absolute inset-x-0 top-1/3 h-64 rounded-full bg-cyan-400/8 blur-3xl" />
 
-					{/* header: status centered */}
+					{/* header: unified status badge */}
 					<div className="relative flex justify-center">
-						<div className="inline-flex items-center gap-1.5 text-[0.6rem] uppercase tracking-[0.28em] text-slate-500">
-							<Gauge className="size-3 text-cyan-400/60" />
-							<span>{speedometer.isWatching ? "Live" : "Stopped"}</span>
+						<div
+							className={cn(
+								"inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[0.6rem] font-medium uppercase tracking-[0.28em] transition-colors duration-500",
+								statusBadge.className
+							)}
+						>
+							<span className="relative flex size-2">
+								{statusBadge.ring && (
+									<span
+										className={cn(
+											"absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping",
+											statusBadge.ring
+										)}
+									/>
+								)}
+								<span
+									className={cn(
+										"relative inline-flex size-2 rounded-full",
+										statusBadge.dot
+									)}
+								/>
+							</span>
+							{statusBadge.label}
 						</div>
 					</div>
 
@@ -285,30 +360,35 @@ export function SpeedometerMVP() {
 
 					{/* buttons */}
 					<div className="relative mt-8 grid gap-4">
-						<div className="grid grid-cols-2 gap-4">
-							<button
-								type="button"
-								onClick={speedometer.requestAccess}
-								className={cn(
-									"inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl border px-5 text-sm font-medium transition",
-									gpsButtonMap[speedometer.permission].className
-								)}
-							>
-								{(() => {
-									const Icon = gpsButtonMap[speedometer.permission].icon
-									return <Icon className="size-4" />
-								})()}
-								{gpsButtonMap[speedometer.permission].label}
-							</button>
-							<button
-								type="button"
-								onClick={speedometer.stop}
-								className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 text-sm font-medium text-slate-100 transition hover:border-white/20 hover:bg-white/10"
-							>
-								<CircleStop className="size-4" />
-								Stop tracking
-							</button>
-						</div>
+						{(() => {
+							const btn = resolveTrackingButton(
+								speedometer.isWatching,
+								speedometer.isRequesting,
+								speedometer.permission
+							)
+							const Icon = btn.icon
+							const onClick = speedometer.isWatching
+								? speedometer.stop
+								: !speedometer.isRequesting &&
+										speedometer.permission !== "unsupported" &&
+										speedometer.permission !== "denied"
+									? speedometer.requestAccess
+									: undefined
+							return (
+								<button
+									type="button"
+									onClick={onClick}
+									disabled={onClick === undefined}
+									className={cn(
+										"inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl border px-5 text-sm font-medium transition disabled:opacity-60 disabled:cursor-not-allowed",
+										btn.className
+									)}
+								>
+									<Icon className="size-4" />
+									{btn.label}
+								</button>
+							)
+						})()}
 						<button
 							type="button"
 							onClick={speedometer.resetStats}
@@ -317,17 +397,6 @@ export function SpeedometerMVP() {
 							<RotateCcw className="size-4" />
 							Reset stats
 						</button>
-						<div className="flex justify-center pt-3">
-							<div
-								className={cn(
-									"inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[0.6rem] font-medium uppercase tracking-[0.28em]",
-									signal.className
-								)}
-							>
-								<Radar className="size-3" />
-								<span>{signal.label}</span>
-							</div>
-						</div>
 						{showInstallBanner && (
 							<button
 								type="button"

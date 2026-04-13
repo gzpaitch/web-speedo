@@ -22,6 +22,7 @@ type SpeedSample = {
 
 type ChromeSpeedometerState = {
 	permission: PermissionStateValue
+	isRequesting: boolean
 	signal: SignalState
 	isWatching: boolean
 	currentSpeedKmh: number
@@ -147,6 +148,7 @@ function readNetworkDetails() {
 
 export function useChromeSpeedometer(): ChromeSpeedometerState {
 	const [permission, setPermission] = useState<PermissionStateValue>("idle")
+	const [isRequesting, setIsRequesting] = useState(false)
 	const [signal, setSignal] = useState<SignalState>("waiting")
 	const [isWatching, setIsWatching] = useState(false)
 	const [currentSpeedKmh, setCurrentSpeedKmh] = useState(0)
@@ -346,11 +348,12 @@ export function useChromeSpeedometer(): ChromeSpeedometerState {
 			return
 		}
 
-		setPermission("prompt")
+		setIsRequesting(true)
 		setErrorMessage(null)
 
 		navigator.geolocation.getCurrentPosition(
 			(position) => {
+				setIsRequesting(false)
 				setPermission("granted")
 				previousPositionRef.current = {
 					lat: position.coords.latitude,
@@ -364,6 +367,7 @@ export function useChromeSpeedometer(): ChromeSpeedometerState {
 				setSignal(resolveSignal(position.coords.accuracy, true))
 			},
 			(error) => {
+				setIsRequesting(false)
 				setErrorMessage(resolveErrorMessage(error))
 				setPermission(
 					error.code === error.PERMISSION_DENIED ? "denied" : "idle"
@@ -409,6 +413,7 @@ export function useChromeSpeedometer(): ChromeSpeedometerState {
 
 	return {
 		permission,
+		isRequesting,
 		signal,
 		isWatching,
 		currentSpeedKmh,

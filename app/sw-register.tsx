@@ -7,11 +7,14 @@ const serviceWorkerUrl = `/sw.js?v=${encodeURIComponent(appVersion)}`
 
 export function ServiceWorkerRegister() {
 	useEffect(() => {
-		if (
-			!("serviceWorker" in navigator) ||
-			process.env.NODE_ENV !== "production"
-		)
+		if (!("serviceWorker" in navigator)) return
+
+		if (process.env.NODE_ENV !== "production") {
+			navigator.serviceWorker.getRegistrations().then((registrations) => {
+				for (const reg of registrations) reg.unregister()
+			})
 			return
+		}
 
 		let hasReloaded = false
 		const reloadOnControllerChange = () => {
