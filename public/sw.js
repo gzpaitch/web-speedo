@@ -1,4 +1,5 @@
-const CACHE_NAME = "speedo-v1"
+const APP_VERSION = new URL(self.location.href).searchParams.get("v") ?? "dev"
+const CACHE_NAME = `speedo-${APP_VERSION}`
 
 // Assets to pre-cache on install
 const PRECACHE_ASSETS = ["/", "/manifest.webmanifest"]

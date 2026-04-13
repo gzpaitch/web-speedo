@@ -10,6 +10,7 @@ import {
 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+import pkg from "@/package.json"
 import { useChromeSpeedometer } from "./useChromeSpeedometer"
 import { usePWAInstall } from "./usePWAInstall"
 
@@ -240,6 +241,10 @@ export function SpeedometerMVP() {
 						</div>
 					</div>
 				</section>
+
+				<footer className="pb-2 text-center text-[0.6rem] uppercase tracking-[0.28em] text-slate-600">
+					v{pkg.version}
+				</footer>
 			</div>
 		</main>
 	)
