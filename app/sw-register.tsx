@@ -7,7 +7,11 @@ const serviceWorkerUrl = `/sw.js?v=${encodeURIComponent(appVersion)}`
 
 export function ServiceWorkerRegister() {
 	useEffect(() => {
-		if (!("serviceWorker" in navigator)) return
+		if (
+			!("serviceWorker" in navigator) ||
+			process.env.NODE_ENV !== "production"
+		)
+			return
 
 		let hasReloaded = false
 		const reloadOnControllerChange = () => {
@@ -21,7 +25,9 @@ export function ServiceWorkerRegister() {
 			reloadOnControllerChange
 		)
 
-		void navigator.serviceWorker.register(serviceWorkerUrl, { scope: "/" })
+		navigator.serviceWorker
+			.register(serviceWorkerUrl, { scope: "/" })
+			.catch((err) => console.error("[SW] Registration failed:", err))
 
 		return () => {
 			navigator.serviceWorker.removeEventListener(

@@ -1,6 +1,6 @@
 {
 	"name": "speedo",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"type": "module",
 	"private": true,
 	"scripts": {
@@ -10,13 +10,14 @@
 		"lint": "biome check . && eslint",
 		"lint:fix": "biome check --write .",
 		"format": "biome format --write .",
-		"format:check": "biome format .",
+		"format:check": "biome format --check .",
 		"type-check": "tsc --noEmit",
 		"ci": "biome ci . && eslint"
 	},
 	"dependencies": {
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
+		"embla-carousel-react": "^8.6.0",
 		"lucide-react": "^1.8.0",
 		"next": "16.2.3",
 		"next-themes": "^0.4.6",

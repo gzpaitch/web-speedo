@@ -40,11 +40,14 @@ export function usePWAInstall() {
 			setState("available")
 		}
 
+		const appInstalledHandler = () => setState("installed")
+
 		window.addEventListener("beforeinstallprompt", handler)
-		window.addEventListener("appinstalled", () => setState("installed"))
+		window.addEventListener("appinstalled", appInstalledHandler)
 
 		return () => {
 			window.removeEventListener("beforeinstallprompt", handler)
+			window.removeEventListener("appinstalled", appInstalledHandler)
 		}
 	}, [])
 

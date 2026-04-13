@@ -37,6 +37,17 @@ type ChromeSpeedometerState = {
 	networkDetails: string
 	requestAccess: () => void
 	stop: () => void
+	resetStats: () => void
+}
+
+const STORAGE_KEY_MAX_SPEED = "speedo_max_speed_kmh"
+
+function readPersistedMaxSpeed(): number {
+	if (typeof window === "undefined") return 0
+	const raw = localStorage.getItem(STORAGE_KEY_MAX_SPEED)
+	if (raw === null) return 0
+	const parsed = parseFloat(raw)
+	return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0
 }
 
 const EARTH_RADIUS_METERS = 6371000
@@ -139,7 +150,7 @@ export function useChromeSpeedometer(): ChromeSpeedometerState {
 	const [signal, setSignal] = useState<SignalState>("waiting")
 	const [isWatching, setIsWatching] = useState(false)
 	const [currentSpeedKmh, setCurrentSpeedKmh] = useState(0)
-	const [maxSpeedKmh, setMaxSpeedKmh] = useState(0)
+	const [maxSpeedKmh, setMaxSpeedKmh] = useState(() => readPersistedMaxSpeed())
 	const [averageSpeedKmh, setAverageSpeedKmh] = useState(0)
 	const [accuracyMeters, setAccuracyMeters] = useState<number | null>(null)
 	const [latitude, setLatitude] = useState<number | null>(null)
@@ -169,6 +180,13 @@ export function useChromeSpeedometer(): ChromeSpeedometerState {
 		}
 
 		let isMounted = true
+		let permissionStatus: PermissionStatus | null = null
+
+		const handlePermissionChange = () => {
+			if (isMounted && permissionStatus) {
+				setPermission(permissionStatus.state as PermissionStateValue)
+			}
+		}
 
 		navigator.permissions
 			.query({ name: "geolocation" })
@@ -177,11 +195,9 @@ export function useChromeSpeedometer(): ChromeSpeedometerState {
 					return
 				}
 
+				permissionStatus = status
 				setPermission(status.state as PermissionStateValue)
-
-				status.onchange = () => {
-					setPermission(status.state as PermissionStateValue)
-				}
+				status.addEventListener("change", handlePermissionChange)
 			})
 			.catch(() => {
 				setPermission("idle")
@@ -189,6 +205,7 @@ export function useChromeSpeedometer(): ChromeSpeedometerState {
 
 		return () => {
 			isMounted = false
+			permissionStatus?.removeEventListener("change", handlePermissionChange)
 		}
 	}, [])
 
@@ -210,6 +227,13 @@ export function useChromeSpeedometer(): ChromeSpeedometerState {
 					lat: position.coords.latitude,
 					lon: position.coords.longitude,
 					timestamp: position.timestamp,
+				}
+
+				if (
+					previousPositionRef.current !== null &&
+					nextSnapshot.timestamp <= previousPositionRef.current.timestamp
+				) {
+					return
 				}
 
 				const rawSpeed = position.coords.speed
@@ -239,10 +263,10 @@ export function useChromeSpeedometer(): ChromeSpeedometerState {
 				}
 
 				previousPositionRef.current = nextSnapshot
-				samplesRef.current = [
-					...samplesRef.current,
-					{ speedKmh: nextSpeedKmh },
-				].slice(-120)
+				samplesRef.current.push({ speedKmh: nextSpeedKmh })
+				if (samplesRef.current.length > 120) {
+					samplesRef.current.shift()
+				}
 
 				const validSamples = samplesRef.current.filter(
 					(sample) => sample.speedKmh > 0.3
@@ -256,7 +280,13 @@ export function useChromeSpeedometer(): ChromeSpeedometerState {
 						: 0
 
 				setCurrentSpeedKmh(nextSpeedKmh)
-				setMaxSpeedKmh((currentMax) => Math.max(currentMax, nextSpeedKmh))
+				setMaxSpeedKmh((currentMax) => {
+					const next = Math.max(currentMax, nextSpeedKmh)
+					if (next > currentMax) {
+						localStorage.setItem(STORAGE_KEY_MAX_SPEED, String(next))
+					}
+					return next
+				})
 				setAverageSpeedKmh(nextAverage)
 				setAccuracyMeters(position.coords.accuracy)
 				setLatitude(position.coords.latitude)
@@ -267,6 +297,11 @@ export function useChromeSpeedometer(): ChromeSpeedometerState {
 				setErrorMessage(null)
 			},
 			(error) => {
+				if (watchIdRef.current !== null) {
+					navigator.geolocation.clearWatch(watchIdRef.current)
+					watchIdRef.current = null
+				}
+
 				setErrorMessage(resolveErrorMessage(error))
 				setIsWatching(false)
 				setSignal("waiting")
@@ -349,9 +384,19 @@ export function useChromeSpeedometer(): ChromeSpeedometerState {
 		}
 
 		previousPositionRef.current = null
+		samplesRef.current = []
 		setIsWatching(false)
 		setSignal("waiting")
 		setSource("waiting")
+	}
+
+	const resetStats = () => {
+		samplesRef.current = []
+		setMaxSpeedKmh(0)
+		setAverageSpeedKmh(0)
+		if (typeof window !== "undefined") {
+			localStorage.removeItem(STORAGE_KEY_MAX_SPEED)
+		}
 	}
 
 	const [browserDetails, setBrowserDetails] = useState("SSR")
@@ -379,5 +424,6 @@ export function useChromeSpeedometer(): ChromeSpeedometerState {
 		networkDetails,
 		requestAccess,
 		stop,
+		resetStats,
 	}
 }
