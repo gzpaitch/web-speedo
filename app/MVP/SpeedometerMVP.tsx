@@ -1,18 +1,67 @@
 "use client"
 
+import useEmblaCarousel from "embla-carousel-react"
 import {
+	CircleCheck,
+	CircleStop,
+	CircleX,
 	Gauge,
 	LocateFixed,
+	MapPin,
+	MapPinOff,
 	Navigation,
 	Radar,
+	RotateCcw,
 	ShieldAlert,
 	Smartphone,
 } from "lucide-react"
+import { useEffect, useState } from "react"
 
 import { cn } from "@/lib/utils"
 import pkg from "@/package.json"
 import { useChromeSpeedometer } from "./useChromeSpeedometer"
 import { usePWAInstall } from "./usePWAInstall"
+
+type DetailItem = {
+	label: string
+	value: string
+}
+
+function DetailList({ items }: { items: DetailItem[] }) {
+	return (
+		<div className="grid gap-3 text-sm text-slate-300">
+			{items.map((item) => (
+				<div
+					key={item.label}
+					className="flex items-center justify-between gap-4 rounded-2xl border border-white/8 bg-black/15 px-4 py-3"
+				>
+					<span>{item.label}</span>
+					<span className="font-mono text-right text-slate-50">
+						{item.value}
+					</span>
+				</div>
+			))}
+		</div>
+	)
+}
+
+function StackedDetailList({ items }: { items: DetailItem[] }) {
+	return (
+		<div className="grid gap-3 text-sm text-slate-300">
+			{items.map((item) => (
+				<div
+					key={item.label}
+					className="rounded-2xl border border-white/8 bg-black/15 px-4 py-3"
+				>
+					<p className="text-[0.65rem] uppercase tracking-[0.24em] text-slate-400">
+						{item.label}
+					</p>
+					<p className="mt-2 font-mono leading-6 text-slate-50">{item.value}</p>
+				</div>
+			))}
+		</div>
+	)
+}
 
 function formatSpeed(value: number) {
 	return new Intl.NumberFormat("en-US", {
@@ -64,10 +113,118 @@ const signalMap = {
 	},
 } as const
 
+const gpsButtonMap = {
+	idle: {
+		label: "Allow GPS",
+		icon: MapPin,
+		className:
+			"border-cyan-300/30 bg-cyan-300/10 text-cyan-50 hover:border-cyan-200/60 hover:bg-cyan-300/20",
+	},
+	prompt: {
+		label: "Allow GPS",
+		icon: MapPin,
+		className:
+			"border-amber-400/30 bg-amber-400/10 text-amber-100 hover:border-amber-300/60 hover:bg-amber-400/20",
+	},
+	granted: {
+		label: "Allow GPS",
+		icon: CircleCheck,
+		className:
+			"border-emerald-500/30 bg-emerald-500/10 text-emerald-100 hover:border-emerald-400/60 hover:bg-emerald-500/20",
+	},
+	denied: {
+		label: "Allow GPS",
+		icon: CircleX,
+		className:
+			"border-rose-400/30 bg-rose-400/10 text-rose-200 hover:border-rose-400/50 hover:bg-rose-400/20",
+	},
+	unsupported: {
+		label: "Allow GPS",
+		icon: MapPinOff,
+		className: "border-white/10 bg-white/5 text-slate-500 cursor-not-allowed",
+	},
+} as const
+
 export function SpeedometerMVP() {
 	const speedometer = useChromeSpeedometer()
 	const signal = signalMap[speedometer.signal]
 	const pwa = usePWAInstall()
+	const [detailsEmblaRef, detailsEmblaApi] = useEmblaCarousel({
+		align: "start",
+		dragFree: false,
+		loop: false,
+	})
+	const [selectedDetailsIndex, setSelectedDetailsIndex] = useState(0)
+	const telemetryItems: DetailItem[] = [
+		{ label: "Permission", value: speedometer.permission },
+		{
+			label: "Accuracy",
+			value: formatAccuracy(speedometer.accuracyMeters),
+		},
+		{
+			label: "Latitude",
+			value: formatCoordinate(speedometer.latitude),
+		},
+		{
+			label: "Longitude",
+			value: formatCoordinate(speedometer.longitude),
+		},
+		{
+			label: "Updated at",
+			value: formatUpdatedAt(speedometer.lastUpdatedAt),
+		},
+	]
+	const chromeContextItems: DetailItem[] = [
+		{
+			label: "Browser",
+			value: speedometer.browserDetails,
+		},
+		{
+			label: "Network",
+			value: speedometer.networkDetails,
+		},
+		{
+			label: "PRD note",
+			value: "Open in Chrome on Android with GPS enabled.",
+		},
+	]
+	const detailSlides = [
+		{
+			key: "raw-telemetry",
+			title: "Raw telemetry",
+			icon: LocateFixed,
+			content: <DetailList items={telemetryItems} />,
+		},
+		{
+			key: "chrome-context",
+			title: "Chrome context",
+			icon: Navigation,
+			content: (
+				<div suppressHydrationWarning>
+					<StackedDetailList items={chromeContextItems} />
+				</div>
+			),
+		},
+	]
+
+	useEffect(() => {
+		if (!detailsEmblaApi) {
+			return
+		}
+
+		const syncSelectedIndex = () => {
+			setSelectedDetailsIndex(detailsEmblaApi.selectedScrollSnap())
+		}
+
+		syncSelectedIndex()
+		detailsEmblaApi.on("select", syncSelectedIndex)
+		detailsEmblaApi.on("reInit", syncSelectedIndex)
+
+		return () => {
+			detailsEmblaApi.off("select", syncSelectedIndex)
+			detailsEmblaApi.off("reInit", syncSelectedIndex)
+		}
+	}, [detailsEmblaApi])
 
 	const showInstallBanner = pwa.state === "available" && !pwa.isIOS
 	const showIOSBanner = pwa.state === "available" && pwa.isIOS
@@ -75,99 +232,166 @@ export function SpeedometerMVP() {
 	return (
 		<main className="min-h-dvh overflow-hidden bg-[radial-gradient(circle_at_top,rgba(94,234,212,0.18),transparent_28%),linear-gradient(180deg,#07111a_0%,#02060a_100%)] text-slate-50">
 			<div className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-4 px-4 pt-[max(env(safe-area-inset-top),1.25rem)] pb-[max(env(safe-area-inset-bottom),1.25rem)]">
-				<div className="flex justify-center pt-1">
-					<div
-						className={cn(
-							"inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-medium uppercase tracking-[0.28em]",
-							signal.className
-						)}
-					>
-						<Radar className="size-3.5" />
-						<span>{signal.label}</span>
-					</div>
-				</div>
-
-				<section className="relative overflow-hidden rounded-[2.5rem] border border-cyan-400/20 bg-[#071019]/90 px-5 pb-5 pt-6 shadow-[0_30px_80px_rgba(0,0,0,0.45)]">
+				<section className="relative flex flex-3 flex-col overflow-hidden rounded-[2.5rem] border border-cyan-400/20 bg-[#071019]/90 px-6 pb-8 pt-6 shadow-[0_30px_80px_rgba(0,0,0,0.45)]">
 					<div className="absolute inset-x-6 top-0 h-px bg-linear-to-r from-transparent via-cyan-300/70 to-transparent" />
-					<div className="absolute inset-x-10 top-16 h-32 rounded-full bg-cyan-400/10 blur-3xl" />
-					<div className="absolute inset-x-12 bottom-8 h-24 rounded-full bg-cyan-400/15 blur-3xl" />
+					<div className="absolute inset-x-0 top-1/3 h-64 rounded-full bg-cyan-400/8 blur-3xl" />
 
-					<div className="relative flex flex-col gap-6">
-						<div className="space-y-2 text-center">
-							<p className="text-[0.65rem] uppercase tracking-[0.45em] text-slate-500">
-								Current speed
+					{/* header: status centered */}
+					<div className="relative flex justify-center">
+						<div className="inline-flex items-center gap-1.5 text-[0.6rem] uppercase tracking-[0.28em] text-slate-500">
+							<Gauge className="size-3 text-cyan-400/60" />
+							<span>{speedometer.isWatching ? "Live" : "Stopped"}</span>
+						</div>
+					</div>
+
+					{/* main speed readout */}
+					<div className="relative flex flex-1 flex-col items-center justify-center gap-2 py-6">
+						<p className="text-[0.6rem] uppercase tracking-[0.45em] text-slate-600">
+							Current speed
+						</p>
+						<div className="font-mono text-[min(32vw,9rem)] font-semibold leading-none -tracking-widest text-white drop-shadow-[0_0_40px_rgba(103,232,249,0.25)]">
+							{formatSpeed(speedometer.currentSpeedKmh)}
+						</div>
+						<p className="text-xl font-light uppercase tracking-[0.55em] text-cyan-200/60">
+							km/h
+						</p>
+					</div>
+
+					{/* max / avg */}
+					<div className="relative grid grid-cols-2 gap-4 mt-2">
+						<div className="rounded-[1.7rem] border border-white/10 bg-white/5 px-4 py-6 text-center backdrop-blur-xl">
+							<p className="text-[0.6rem] uppercase tracking-[0.28em] text-slate-500">
+								Max
 							</p>
-							<div className="font-mono text-[5.75rem] font-semibold leading-none -tracking-widest text-white">
-								{formatSpeed(speedometer.currentSpeedKmh)}
-							</div>
-							<p className="text-lg uppercase tracking-[0.42em] text-cyan-100/70">
+							<p className="mt-3 font-mono text-4xl font-medium text-white">
+								{formatSpeed(speedometer.maxSpeedKmh)}
+							</p>
+							<p className="mt-1 text-[0.55rem] uppercase tracking-[0.28em] text-slate-600">
 								km/h
 							</p>
 						</div>
-
-						<div className="grid grid-cols-2 gap-3">
-							<div className="rounded-[1.7rem] border border-white/10 bg-white/5 p-4 text-center backdrop-blur-xl">
-								<p className="text-[0.65rem] uppercase tracking-[0.28em] text-slate-400">
-									Max speed
-								</p>
-								<p className="mt-2 font-mono text-3xl text-white">
-									{formatSpeed(speedometer.maxSpeedKmh)}
-								</p>
-							</div>
-							<div className="rounded-[1.7rem] border border-white/10 bg-white/5 p-4 text-center backdrop-blur-xl">
-								<p className="text-[0.65rem] uppercase tracking-[0.28em] text-slate-400">
-									Average
-								</p>
-								<p className="mt-2 font-mono text-3xl text-white">
-									{formatSpeed(speedometer.averageSpeedKmh)}
-								</p>
-							</div>
+						<div className="rounded-[1.7rem] border border-white/10 bg-white/5 px-4 py-6 text-center backdrop-blur-xl">
+							<p className="text-[0.6rem] uppercase tracking-[0.28em] text-slate-500">
+								Avg
+							</p>
+							<p className="mt-3 font-mono text-4xl font-medium text-white">
+								{formatSpeed(speedometer.averageSpeedKmh)}
+							</p>
+							<p className="mt-1 text-[0.55rem] uppercase tracking-[0.28em] text-slate-600">
+								km/h
+							</p>
 						</div>
+					</div>
 
-						<div className="grid gap-3">
+					{/* buttons */}
+					<div className="relative mt-8 grid gap-4">
+						<div className="grid grid-cols-2 gap-4">
 							<button
 								type="button"
 								onClick={speedometer.requestAccess}
-								className="inline-flex min-h-14 items-center justify-center rounded-2xl border border-cyan-300/30 bg-cyan-300/10 px-5 text-sm font-medium text-cyan-50 transition hover:border-cyan-200/60 hover:bg-cyan-300/20"
+								className={cn(
+									"inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl border px-5 text-sm font-medium transition",
+									gpsButtonMap[speedometer.permission].className
+								)}
 							>
-								Allow GPS in Chrome
+								{(() => {
+									const Icon = gpsButtonMap[speedometer.permission].icon
+									return <Icon className="size-4" />
+								})()}
+								{gpsButtonMap[speedometer.permission].label}
 							</button>
 							<button
 								type="button"
 								onClick={speedometer.stop}
-								className="inline-flex min-h-14 items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 text-sm font-medium text-slate-100 transition hover:border-white/20 hover:bg-white/10"
+								className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 text-sm font-medium text-slate-100 transition hover:border-white/20 hover:bg-white/10"
 							>
+								<CircleStop className="size-4" />
 								Stop tracking
 							</button>
-							{showInstallBanner && (
-								<button
-									type="button"
-									onClick={pwa.install}
-									className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl border border-violet-400/30 bg-violet-400/10 px-5 text-sm font-medium text-violet-100 transition hover:border-violet-300/60 hover:bg-violet-400/20"
-								>
-									<Smartphone className="size-4" />
-									Install app
-								</button>
-							)}
 						</div>
-
-						<div className="flex items-center justify-between rounded-[1.7rem] border border-white/10 bg-black/20 px-4 py-3 text-xs uppercase tracking-[0.28em] text-slate-400">
-							<div className="inline-flex items-center gap-2">
-								<Gauge className="size-4 text-cyan-300" />
-								<span>{speedometer.source}</span>
+						<button
+							type="button"
+							onClick={speedometer.resetStats}
+							className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl border border-rose-400/20 bg-rose-400/8 px-5 text-sm font-medium text-rose-200 transition hover:border-rose-400/40 hover:bg-rose-400/15"
+						>
+							<RotateCcw className="size-4" />
+							Reset stats
+						</button>
+						<div className="flex justify-center pt-3">
+							<div
+								className={cn(
+									"inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[0.6rem] font-medium uppercase tracking-[0.28em]",
+									signal.className
+								)}
+							>
+								<Radar className="size-3" />
+								<span>{signal.label}</span>
 							</div>
-							<span>{speedometer.isWatching ? "Live" : "Stopped"}</span>
 						</div>
+						{showInstallBanner && (
+							<button
+								type="button"
+								onClick={pwa.install}
+								className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl border border-violet-400/30 bg-violet-400/10 px-5 text-sm font-medium text-violet-100 transition hover:border-violet-300/60 hover:bg-violet-400/20"
+							>
+								<Smartphone className="size-4" />
+								Install app
+							</button>
+						)}
+					</div>
 
-						{speedometer.errorMessage ? (
-							<div className="rounded-2xl border border-rose-400/20 bg-rose-400/10 p-4 text-sm text-rose-100">
-								<div className="mb-2 inline-flex items-center gap-2 font-medium">
-									<ShieldAlert className="size-4" />
-									<span>Tracking error</span>
-								</div>
-								<p>{speedometer.errorMessage}</p>
+					{speedometer.errorMessage ? (
+						<div className="relative mt-5 rounded-2xl border border-rose-400/20 bg-rose-400/10 p-4 text-sm text-rose-100">
+							<div className="mb-2 inline-flex items-center gap-2 font-medium">
+								<ShieldAlert className="size-4" />
+								<span>Tracking error</span>
 							</div>
-						) : null}
+							<p>{speedometer.errorMessage}</p>
+						</div>
+					) : null}
+				</section>
+
+				<section className="space-y-4 pb-2">
+					<section
+						className="overflow-hidden"
+						ref={detailsEmblaRef}
+						aria-label="Telemetry details carousel"
+					>
+						<div className="-ml-4 flex touch-pan-y">
+							{detailSlides.map((slide) => {
+								const Icon = slide.icon
+
+								return (
+									<div key={slide.key} className="min-w-0 flex-[0_0_100%] pl-4">
+										<div className="rounded-[2rem] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+											<div className="mb-4 flex items-center gap-2 text-sm font-medium text-slate-100">
+												<Icon className="size-4 text-cyan-300" />
+												<span>{slide.title}</span>
+											</div>
+											{slide.content}
+										</div>
+									</div>
+								)
+							})}
+						</div>
+					</section>
+
+					<div className="flex items-center justify-center gap-2">
+						{detailSlides.map((slide, index) => (
+							<button
+								key={slide.key}
+								type="button"
+								onClick={() => detailsEmblaApi?.scrollTo(index)}
+								className={cn(
+									"h-2 rounded-full transition",
+									selectedDetailsIndex === index
+										? "w-6 bg-cyan-300"
+										: "w-2 bg-white/20"
+								)}
+								aria-label={`Go to slide ${index + 1}`}
+								aria-pressed={selectedDetailsIndex === index}
+							/>
+						))}
 					</div>
 				</section>
 
@@ -183,64 +407,6 @@ export function SpeedometerMVP() {
 						</p>
 					</div>
 				)}
-
-				<section className="grid gap-4 pb-4">
-					<div className="rounded-[2rem] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
-						<div className="mb-4 flex items-center gap-2 text-sm font-medium text-slate-100">
-							<LocateFixed className="size-4 text-cyan-300" />
-							<span>Raw telemetry</span>
-						</div>
-
-						<div className="grid gap-3 text-sm text-slate-300">
-							<div className="flex items-center justify-between gap-4">
-								<span>Permission</span>
-								<span className="font-mono text-slate-50">
-									{speedometer.permission}
-								</span>
-							</div>
-							<div className="flex items-center justify-between gap-4">
-								<span>Accuracy</span>
-								<span className="font-mono text-slate-50">
-									{formatAccuracy(speedometer.accuracyMeters)}
-								</span>
-							</div>
-							<div className="flex items-center justify-between gap-4">
-								<span>Latitude</span>
-								<span className="font-mono text-slate-50">
-									{formatCoordinate(speedometer.latitude)}
-								</span>
-							</div>
-							<div className="flex items-center justify-between gap-4">
-								<span>Longitude</span>
-								<span className="font-mono text-slate-50">
-									{formatCoordinate(speedometer.longitude)}
-								</span>
-							</div>
-							<div className="flex items-center justify-between gap-4">
-								<span>Updated at</span>
-								<span className="font-mono text-slate-50">
-									{formatUpdatedAt(speedometer.lastUpdatedAt)}
-								</span>
-							</div>
-						</div>
-					</div>
-
-					<div className="rounded-[2rem] border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
-						<div className="mb-4 flex items-center gap-2 text-sm font-medium text-slate-100">
-							<Navigation className="size-4 text-cyan-300" />
-							<span>Chrome context</span>
-						</div>
-						<div className="space-y-3 text-sm leading-6 text-slate-300">
-							{/* suppressHydrationWarning: values differ between SSR and client intentionally */}
-							<p suppressHydrationWarning>{speedometer.browserDetails}</p>
-							<p suppressHydrationWarning>{speedometer.networkDetails}</p>
-							<p className="text-slate-400">
-								For a PRD-faithful test, open this route in Chrome on Android
-								with GPS enabled.
-							</p>
-						</div>
-					</div>
-				</section>
 
 				<footer className="pb-2 text-center text-[0.6rem] uppercase tracking-[0.28em] text-slate-600">
 					v{pkg.version}

@@ -55,13 +55,13 @@ export default function RootLayout({
 			lang="en"
 			suppressHydrationWarning
 			className={cn(
-				"bg-[#02060a] antialiased",
+				"bg-[#00b8db] antialiased",
 				fontMono.variable,
 				"font-sans",
 				inter.variable
 			)}
 		>
-			<body className="min-h-dvh bg-[#02060a]">
+			<body className="min-h-dvh bg-[#00b8db]">
 				<OrientationLock />
 				<ThemeProvider>{children}</ThemeProvider>
 				<ServiceWorkerRegister />
