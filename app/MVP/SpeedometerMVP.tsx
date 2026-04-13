@@ -68,14 +68,12 @@ export function SpeedometerMVP() {
 	const signal = signalMap[speedometer.signal]
 	const pwa = usePWAInstall()
 
-	const showInstallBanner =
-		pwa.state === "available" && !pwa.isIOS
-	const showIOSBanner =
-		pwa.state === "available" && pwa.isIOS
+	const showInstallBanner = pwa.state === "available" && !pwa.isIOS
+	const showIOSBanner = pwa.state === "available" && pwa.isIOS
 
 	return (
-		<main className="min-h-svh overflow-hidden bg-[radial-gradient(circle_at_top,rgba(94,234,212,0.18),transparent_28%),linear-gradient(180deg,#07111a_0%,#02060a_100%)] text-slate-50">
-			<div className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-4 px-4 py-5">
+		<main className="min-h-dvh overflow-hidden bg-[radial-gradient(circle_at_top,rgba(94,234,212,0.18),transparent_28%),linear-gradient(180deg,#07111a_0%,#02060a_100%)] text-slate-50">
+			<div className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-4 px-4 pt-[max(env(safe-area-inset-top),1.25rem)] pb-[max(env(safe-area-inset-bottom),1.25rem)]">
 				<div className="flex justify-center pt-1">
 					<div
 						className={cn(

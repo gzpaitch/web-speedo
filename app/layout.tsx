@@ -17,6 +17,7 @@ export const metadata: Metadata = {
 	title: "Speedo",
 	description:
 		"Digital bike computer — speed, metrics and records on your handlebars.",
+	applicationName: "Speedo",
 	appleWebApp: {
 		capable: true,
 		statusBarStyle: "black-translucent",
@@ -32,9 +33,10 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
 	themeColor: [
-		{ media: "(prefers-color-scheme: dark)", color: "#000000" },
-		{ media: "(prefers-color-scheme: light)", color: "#ffffff" },
+		{ media: "(prefers-color-scheme: dark)", color: "#02060a" },
+		{ media: "(prefers-color-scheme: light)", color: "#02060a" },
 	],
+	colorScheme: "dark",
 	width: "device-width",
 	initialScale: 1,
 	maximumScale: 1,
@@ -52,13 +54,13 @@ export default function RootLayout({
 			lang="en"
 			suppressHydrationWarning
 			className={cn(
-				"antialiased",
+				"bg-[#02060a] antialiased",
 				fontMono.variable,
 				"font-sans",
 				inter.variable
 			)}
 		>
-			<body>
+			<body className="min-h-dvh bg-[#02060a]">
 				<ThemeProvider>{children}</ThemeProvider>
 				<ServiceWorkerRegister />
 			</body>

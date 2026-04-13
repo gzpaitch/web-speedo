@@ -7,6 +7,10 @@ interface BeforeInstallPromptEvent extends Event {
 	userChoice: Promise<{ outcome: "accepted" | "dismissed" }>
 }
 
+interface NavigatorWithStandalone extends Navigator {
+	standalone?: boolean
+}
+
 export type PWAInstallState = "idle" | "available" | "installed" | "dismissed"
 
 export function usePWAInstall() {
@@ -17,8 +21,7 @@ export function usePWAInstall() {
 	useEffect(() => {
 		const standalone =
 			window.matchMedia("(display-mode: standalone)").matches ||
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			(navigator as any).standalone === true
+			(navigator as NavigatorWithStandalone).standalone === true
 		if (standalone) {
 			setState("installed")
 			return

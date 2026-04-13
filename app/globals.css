@@ -122,8 +122,14 @@
 	}
 	body {
 		@apply bg-background text-foreground;
+		min-height: 100dvh;
 	}
 	html {
 		@apply font-sans;
+		background-color: #02060a;
+	}
+	html,
+	body {
+		overscroll-behavior: none;
 	}
 }
