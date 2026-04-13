@@ -133,3 +133,19 @@
 		overscroll-behavior: none;
 	}
 }
+
+/* Portrait lock fallback — for browser tabs where screen.orientation.lock()
+   is not available. Rotates the entire viewport back to portrait when the
+   device is held landscape. */
+@media (orientation: landscape) {
+	:root {
+		position: absolute;
+		top: 100%;
+		left: 0;
+		width: 100svh;
+		height: 100svw;
+		overflow: hidden;
+		transform: rotate(-90deg);
+		transform-origin: left top;
+	}
+}
