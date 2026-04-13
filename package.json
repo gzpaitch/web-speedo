@@ -1,6 +1,6 @@
 {
 	"name": "speedo",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"type": "module",
 	"private": true,
 	"scripts": {
@@ -10,7 +10,7 @@
 		"lint": "biome check . && eslint",
 		"lint:fix": "biome check --write .",
 		"format": "biome format --write .",
-		"format:check": "biome format .",
+		"format:check": "biome format --check .",
 		"type-check": "tsc --noEmit",
 		"ci": "biome ci . && eslint"
 	},

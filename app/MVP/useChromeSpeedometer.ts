@@ -169,6 +169,13 @@ export function useChromeSpeedometer(): ChromeSpeedometerState {
 		}
 
 		let isMounted = true
+		let permissionStatus: PermissionStatus | null = null
+
+		const handlePermissionChange = () => {
+			if (isMounted && permissionStatus) {
+				setPermission(permissionStatus.state as PermissionStateValue)
+			}
+		}
 
 		navigator.permissions
 			.query({ name: "geolocation" })
@@ -177,11 +184,9 @@ export function useChromeSpeedometer(): ChromeSpeedometerState {
 					return
 				}
 
+				permissionStatus = status
 				setPermission(status.state as PermissionStateValue)
-
-				status.onchange = () => {
-					setPermission(status.state as PermissionStateValue)
-				}
+				status.addEventListener("change", handlePermissionChange)
 			})
 			.catch(() => {
 				setPermission("idle")
@@ -189,6 +194,7 @@ export function useChromeSpeedometer(): ChromeSpeedometerState {
 
 		return () => {
 			isMounted = false
+			permissionStatus?.removeEventListener("change", handlePermissionChange)
 		}
 	}, [])
 
@@ -210,6 +216,13 @@ export function useChromeSpeedometer(): ChromeSpeedometerState {
 					lat: position.coords.latitude,
 					lon: position.coords.longitude,
 					timestamp: position.timestamp,
+				}
+
+				if (
+					previousPositionRef.current !== null &&
+					nextSnapshot.timestamp <= previousPositionRef.current.timestamp
+				) {
+					return
 				}
 
 				const rawSpeed = position.coords.speed
@@ -239,10 +252,10 @@ export function useChromeSpeedometer(): ChromeSpeedometerState {
 				}
 
 				previousPositionRef.current = nextSnapshot
-				samplesRef.current = [
-					...samplesRef.current,
-					{ speedKmh: nextSpeedKmh },
-				].slice(-120)
+				samplesRef.current.push({ speedKmh: nextSpeedKmh })
+				if (samplesRef.current.length > 120) {
+					samplesRef.current.shift()
+				}
 
 				const validSamples = samplesRef.current.filter(
 					(sample) => sample.speedKmh > 0.3
@@ -267,6 +280,11 @@ export function useChromeSpeedometer(): ChromeSpeedometerState {
 				setErrorMessage(null)
 			},
 			(error) => {
+				if (watchIdRef.current !== null) {
+					navigator.geolocation.clearWatch(watchIdRef.current)
+					watchIdRef.current = null
+				}
+
 				setErrorMessage(resolveErrorMessage(error))
 				setIsWatching(false)
 				setSignal("waiting")
@@ -349,6 +367,7 @@ export function useChromeSpeedometer(): ChromeSpeedometerState {
 		}
 
 		previousPositionRef.current = null
+		samplesRef.current = []
 		setIsWatching(false)
 		setSignal("waiting")
 		setSource("waiting")
