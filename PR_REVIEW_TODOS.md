@@ -1,6 +1,7 @@
 # PR Review — TODOs e Análise
 
 > PR #1 · `feat: scaffold MVP structure with PWA support and updated specs`
+> PR #3 · `feat: unify GPS/status UI, fix permission flow, and auto-unregister SW in dev`
 > Revisado por: CodeRabbit + Qodo + Kilo + Gemini + Cubic
 
 ---
@@ -43,9 +44,22 @@ Adicionado guard `res.ok` antes de cachear — tanto na estratégia cache-first 
 **Arquivo:** `public/sw.js`
 Cleanup agora filtra por prefixo `speedo-`, deletando apenas caches próprios do app.
 
-### CI-1 · `format:check` formatava em vez de verificar
+### CI-1 · Script `format:check` com comando inválido
 **Arquivo:** `package.json`
-Script corrigido de `biome format .` para `biome format --check .`.
+`biome format --check .` não existe no Biome CLI — o flag `--check` não é reconhecido.
+Corrigido para `biome ci .`, que verifica formatação + lint sem escrever arquivos e falha com exit ≠ 0 quando há problemas. *(A tentativa anterior de usar `biome format --check` era incorreta — CodeRabbit confirmou via web search.)*
+
+### BUG-2 · `getRegistrations()` sem `.catch()` em modo dev
+**Arquivo:** `app/sw-register.tsx` (PR #3)
+`navigator.serviceWorker.getRegistrations().then(...)` não tinha tratamento de erro.
+Como o componente é montado no root layout, qualquer rejeição gerava unhandled promise rejection a cada page load em dev.
+Adicionado `.catch((err) => console.warn("[SW] Failed to unregister:", err))`.
+
+### CODE-1 · `TrackingButtonConfig.onClick` morto + IIFE desnecessário
+**Arquivo:** `app/MVP/SpeedometerMVP.tsx` (PR #3)
+O campo `onClick` em `TrackingButtonConfig` era sempre `undefined` em todos os branches de `resolveTrackingButton()` e nunca era lido pelo componente — o handler real era calculado separadamente dentro de um IIFE no JSX.
+- Removido `onClick` do tipo `TrackingButtonConfig`
+- Substituído o IIFE por variáveis pré-calculadas (`trackingBtn`, `TrackingIcon`, `trackingOnClick`) antes do `return` do componente, tornando o JSX mais legível
 
 ---
 
@@ -63,6 +77,14 @@ O código calcula rolling average dos últimos 120 samples (~2 min). O PRD espec
 - `totalDistanceRef` como `useRef<number>`
 - Acumular `haversineMeters()` a cada update com `previousPosition` válido
 - Expor no estado e exibir em `SpeedometerMVP.tsx`
+
+### SPEC-1 · Auto-fullscreen requer user activation
+**Arquivo:** `spec/PRD.md` · linha ~115
+
+`Element.requestFullscreen()` requer transient user activation nos browsers móveis modernos (Chrome, Safari, Firefox). A sessão que inicia via GPS auto-start não dispara uma gesture do usuário, tornando o critério de "entrar em fullscreen automaticamente" inviável.
+Opções:
+- Diferir o fullscreen até o usuário tocar na tela após o início do tracking
+- Exigir um botão "Start" explícito que sirva de gesture (já suficiente para GPS + fullscreen no mesmo tap)
 
 ---
 
