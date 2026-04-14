@@ -33,8 +33,7 @@ export function NumberInputRow({
 	return (
 		<label
 			className={cn(
-				"group rounded-[1.4rem] border border-transparent px-3 py-3 transition-colors",
-				"hover:border-border/70 hover:bg-muted/35",
+				"group rounded-2xl px-2 py-4 transition-colors hover:bg-muted/35",
 				className
 			)}
 		>
@@ -81,7 +80,7 @@ export function NumberInputRow({
 						}
 					}}
 					className={cn(
-						"h-13 w-24 shrink-0 rounded-2xl border border-border/70 bg-background/80 px-4 text-right text-base font-medium tabular-nums text-foreground shadow-sm outline-none transition",
+						"h-14 w-28 shrink-0 rounded-2xl border border-border/70 bg-background/80 px-4 text-right text-base font-medium tabular-nums text-foreground shadow-sm outline-none transition",
 						"placeholder:text-muted-foreground/55 focus:border-ring focus:bg-background focus:ring-4 focus:ring-ring/10"
 					)}
 				/>

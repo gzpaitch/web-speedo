@@ -218,11 +218,11 @@ export function SpeedometerScreen({
 					</div>
 				</div>
 
-				{!focus.isFocused ? (
-					<div className="space-y-4">
-						<div className="rounded-[2rem] border border-border/70 bg-card/65 p-3 shadow-[0_20px_60px_-32px_hsl(var(--foreground)/0.3)] backdrop-blur">
-							<MetricsCarousel metrics={metrics} />
-						</div>
+				<div className="space-y-4">
+					<div className="rounded-[2rem] border border-border/70 bg-card/65 p-3 shadow-[0_20px_60px_-32px_hsl(var(--foreground)/0.3)] backdrop-blur">
+						<MetricsCarousel metrics={metrics} />
+					</div>
+					{!focus.isFocused ? (
 						<div className="flex items-center justify-center gap-3">
 							<MetricsEditMode activeIds={activeIds} onToggle={toggle} />
 							<Button
@@ -241,8 +241,8 @@ export function SpeedometerScreen({
 								)}
 							</Button>
 						</div>
-					</div>
-				) : null}
+					) : null}
+				</div>
 
 				<div className="mt-6">
 					<SessionControls
@@ -271,39 +271,39 @@ export function SpeedometerScreen({
 						/>
 					</div>
 				</div>
-				<div className="flex w-1/2 flex-col justify-between gap-4 py-2">
+				<div className="flex w-1/2 min-h-0 flex-col gap-5 py-2">
+					<div className="flex min-h-0 flex-1 rounded-[2rem] border border-border/70 bg-card/65 p-3 shadow-[0_20px_60px_-32px_hsl(var(--foreground)/0.3)] backdrop-blur">
+						<MetricsCarousel metrics={metrics} className="h-full" />
+					</div>
 					{!focus.isFocused ? (
-						<>
-							<div className="rounded-[2rem] border border-border/70 bg-card/65 p-3 shadow-[0_20px_60px_-32px_hsl(var(--foreground)/0.3)] backdrop-blur">
-								<MetricsCarousel metrics={metrics} />
-							</div>
-							<div className="flex items-center justify-center gap-3">
-								<MetricsEditMode activeIds={activeIds} onToggle={toggle} />
-								<Button
-									type="button"
-									variant="outline"
-									size="icon"
-									className="size-11 rounded-full border-border/70 bg-background/80 text-muted-foreground shadow-sm backdrop-blur hover:text-foreground"
-									onClick={toggleTheme}
-									aria-label={tCommon("theme")}
-									title={tCommon("theme")}
-								>
-									{isDark ? (
-										<Sun className="size-5" />
-									) : (
-										<Moon className="size-5" />
-									)}
-								</Button>
-							</div>
-						</>
+						<div className="flex items-center justify-center gap-3 pt-1">
+							<MetricsEditMode activeIds={activeIds} onToggle={toggle} />
+							<Button
+								type="button"
+								variant="outline"
+								size="icon"
+								className="size-11 rounded-full border-border/70 bg-background/80 text-muted-foreground shadow-sm backdrop-blur hover:text-foreground"
+								onClick={toggleTheme}
+								aria-label={tCommon("theme")}
+								title={tCommon("theme")}
+							>
+								{isDark ? (
+									<Sun className="size-5" />
+								) : (
+									<Moon className="size-5" />
+								)}
+							</Button>
+						</div>
 					) : null}
-					<SessionControls
-						sessionState={session.snapshot.state}
-						onStart={session.start}
-						onPause={session.pause}
-						onResume={session.resume}
-						onEnd={session.end}
-					/>
+					<div className="shrink-0">
+						<SessionControls
+							sessionState={session.snapshot.state}
+							onStart={session.start}
+							onPause={session.pause}
+							onResume={session.resume}
+							onEnd={session.end}
+						/>
+					</div>
 				</div>
 			</div>
 		</section>

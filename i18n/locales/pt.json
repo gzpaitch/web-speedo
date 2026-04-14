@@ -65,6 +65,13 @@
 	},
 	"settings": {
 		"title": "Ajustes",
+		"installTitle": "Instalar aplicativo",
+		"installDescription": "Adicione o Speedo à tela inicial para abrir em tela cheia e ter acesso mais rápido durante o pedal.",
+		"installAction": "Instalar app",
+		"installIosDescription": "No iPhone ou iPad, abra no Safari, toque em Compartilhar e escolha Adicionar à Tela de Início.",
+		"installIosCta": "Safari > Compartilhar > Adicionar à Tela de Início",
+		"installInstalled": "Instalado",
+		"installInstalledDescription": "O Speedo já está pronto para abrir como aplicativo instalado neste dispositivo.",
 		"theme": "Tema",
 		"themeHint": "Volta para o tema do sistema ao fechar o app.",
 		"themeLight": "Claro",

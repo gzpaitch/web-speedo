@@ -13,7 +13,7 @@ type SegmentedSelectorProps<T extends string> = {
 	label: string
 	value: T
 	onChange: (value: T) => void
-	options: readonly { value: T; label: string }[]
+	options: readonly { value: T; label: string; icon?: ReactNode }[]
 	icon?: ReactNode
 }
 
@@ -25,7 +25,7 @@ function SegmentedSelector<T extends string>({
 	icon,
 }: SegmentedSelectorProps<T>) {
 	return (
-		<div className="flex min-h-18 flex-col gap-3 rounded-[1.4rem] border border-transparent px-3 py-3 transition-colors hover:border-border/70 hover:bg-muted/35">
+		<div className="flex flex-col gap-4 rounded-2xl px-2 py-4 transition-colors hover:bg-muted/35">
 			<div className="flex w-full items-center gap-3">
 				{icon ? (
 					<div className="flex size-11 shrink-0 items-center justify-center rounded-2xl border border-border/70 bg-background/75 text-muted-foreground shadow-sm">
@@ -36,21 +36,24 @@ function SegmentedSelector<T extends string>({
 					{label}
 				</p>
 			</div>
-			<div className="flex w-full flex-wrap gap-2 rounded-[1.6rem] border border-border/70 bg-background/75 p-1 shadow-sm">
+			<div className="flex w-full flex-col gap-3 sm:flex-row sm:flex-wrap">
 				{options.map((option) => (
 					<Button
 						key={option.value}
 						type="button"
-						size="sm"
+						size="lg"
 						variant={value === option.value ? "default" : "outline"}
 						onClick={() => onChange(option.value)}
 						className={cn(
-							"min-h-11 flex-1 rounded-[1.2rem] px-4 font-medium tracking-tight shadow-none sm:flex-none",
-							value !== option.value &&
-								"border-transparent bg-transparent hover:border-border/80 hover:bg-muted/55"
+							"min-h-14 flex-1 rounded-full px-6 text-base font-medium tracking-tight sm:flex-none",
 						)}
 						aria-pressed={value === option.value}
 					>
+						{option.icon ? (
+							<span className="mr-2 flex shrink-0 items-center justify-center">
+								{option.icon}
+							</span>
+						) : null}
 						{option.label}
 					</Button>
 				))}
@@ -84,7 +87,7 @@ type OrientationSelectorProps = {
 	value: OrientationMode
 	onChange: (mode: OrientationMode) => void
 	label: string
-	options: readonly { value: OrientationMode; label: string }[]
+	options: readonly { value: OrientationMode; label: string; icon?: ReactNode }[]
 	icon?: ReactNode
 }
 

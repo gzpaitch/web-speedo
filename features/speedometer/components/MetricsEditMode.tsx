@@ -19,10 +19,34 @@ type Props = {
 export function MetricsEditMode({ activeIds, onToggle }: Props) {
 	const t = useTranslations("metrics")
 	const [open, setOpen] = React.useState(false)
+	const [isLandscape, setIsLandscape] = React.useState(false)
+
+	React.useEffect(() => {
+		if (typeof window === "undefined") {
+			return
+		}
+
+		const mediaQuery = window.matchMedia("(orientation: landscape)")
+		const updateOrientation = () => setIsLandscape(mediaQuery.matches)
+
+		updateOrientation()
+
+		if (typeof mediaQuery.addEventListener === "function") {
+			mediaQuery.addEventListener("change", updateOrientation)
+			return () => mediaQuery.removeEventListener("change", updateOrientation)
+		}
+
+		mediaQuery.addListener(updateOrientation)
+		return () => mediaQuery.removeListener(updateOrientation)
+	}, [])
 
 	return (
 		<div className="relative flex justify-center">
-			<Drawer.Root open={open} onOpenChange={setOpen}>
+			<Drawer.Root
+				open={open}
+				onOpenChange={setOpen}
+				direction={isLandscape ? "right" : "bottom"}
+			>
 				<Drawer.Trigger asChild>
 					<Button
 						type="button"
@@ -37,19 +61,31 @@ export function MetricsEditMode({ activeIds, onToggle }: Props) {
 				</Drawer.Trigger>
 				<Drawer.Portal>
 					<Drawer.Overlay className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm" />
-					<Drawer.Content className="fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-[2rem] border border-border/70 bg-background/96 outline-none backdrop-blur">
-						<div className="mx-auto mt-4 h-1.5 w-[60px] rounded-full bg-muted" />
-						<div className="p-6 pb-12">
-							<div className="mb-6 flex items-start justify-between">
+					<Drawer.Content
+						className={cn(
+							"fixed z-50 flex outline-none",
+							isLandscape
+								? "inset-y-3 right-3 left-3 h-auto max-h-[calc(100dvh-1.5rem)] flex-col rounded-[2rem] border border-border/70 bg-background/96 shadow-2xl backdrop-blur sm:left-auto sm:w-full sm:max-w-md"
+								: "inset-x-0 bottom-0 mt-24 max-h-[85dvh] flex-col rounded-t-[2rem] border border-border/70 bg-background/96 backdrop-blur"
+						)}
+					>
+						<div
+							className={cn(
+								"mx-auto rounded-full bg-muted",
+								isLandscape ? "mt-3 h-10 w-1.5" : "mt-4 h-1.5 w-15"
+							)}
+						/>
+						<div className="flex min-h-0 flex-1 flex-col p-4 pb-4 sm:p-6 sm:pb-6">
+							<div className="mb-4 flex items-start justify-between gap-3 sm:mb-6">
 								<div className="flex items-start gap-3">
 									<div className="flex size-11 shrink-0 items-center justify-center rounded-2xl border border-border/70 bg-background/80 text-muted-foreground shadow-sm">
 										<SlidersHorizontal className="size-5" />
 									</div>
-									<div>
-										<Drawer.Title className="text-xl font-semibold tracking-tight">
+									<div className="min-w-0">
+										<Drawer.Title className="text-lg font-semibold tracking-tight sm:text-xl">
 											{t("editTitle")}
 										</Drawer.Title>
-										<Drawer.Description className="mt-1 text-sm text-muted-foreground">
+										<Drawer.Description className="mt-1 text-sm leading-relaxed text-muted-foreground">
 											{t("editHint")}
 										</Drawer.Description>
 									</div>
@@ -66,7 +102,7 @@ export function MetricsEditMode({ activeIds, onToggle }: Props) {
 									</Button>
 								</Drawer.Close>
 							</div>
-							<ul className="space-y-3">
+							<ul className="min-h-0 space-y-3 overflow-y-auto pr-1">
 								{ALL_METRIC_IDS.map((id) => {
 									const active = activeIds.includes(id)
 									return (

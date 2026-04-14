@@ -27,8 +27,7 @@ export function ToggleRow({
 	return (
 		<div
 			className={cn(
-				"group rounded-[1.4rem] border border-transparent px-3 py-3 transition-colors",
-				"hover:border-border/70 hover:bg-muted/35",
+				"group rounded-2xl px-2 py-4 transition-colors hover:bg-muted/35",
 				disabled && "opacity-70",
 				className
 			)}
@@ -51,14 +50,12 @@ export function ToggleRow({
 						</p>
 					) : null}
 				</div>
-				<div className="rounded-full border border-border/70 bg-background/75 p-1 shadow-sm">
-					<Switch
-						checked={checked}
-						onCheckedChange={onCheckedChange}
-						disabled={disabled}
-						aria-label={label}
-					/>
-				</div>
+				<Switch
+					checked={checked}
+					onCheckedChange={onCheckedChange}
+					disabled={disabled}
+					aria-label={label}
+				/>
 			</div>
 		</div>
 	)

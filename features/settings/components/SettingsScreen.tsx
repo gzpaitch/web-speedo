@@ -2,14 +2,20 @@
 
 import {
 	BellRing,
+	CheckCircle2,
+	Download,
 	MoonStar,
 	RotateCw,
 	Ruler,
 	Scale,
+	Share,
 	Smartphone,
 } from "lucide-react"
 import { useTranslations } from "next-intl"
 
+import { usePWAInstall } from "@/app/MVP/usePWAInstall"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { useActiveMetrics } from "@/features/speedometer/hooks/useActiveMetrics"
 import type { Language } from "@/features/speedometer/types"
@@ -31,8 +37,10 @@ export function SettingsScreen() {
 	const { resolvedTheme, setTheme } = useTheme()
 	const { setLanguage } = useLanguage()
 	const wakeLock = useWakeLock(settings.keepScreenOn)
+	const pwa = usePWAInstall()
 
 	const isDark = resolvedTheme === "dark"
+	const showInstallCard = pwa.state === "available" || pwa.state === "installed"
 
 	return (
 		<section
@@ -42,9 +50,6 @@ export function SettingsScreen() {
 			)}
 			aria-labelledby="settings-title"
 		>
-			<div className="pointer-events-none absolute inset-x-0 top-0 h-64 bg-[radial-gradient(circle_at_top,_hsl(var(--primary)/0.16),_transparent_58%)] opacity-90" />
-			<div className="pointer-events-none absolute right-0 bottom-24 size-44 rounded-full bg-[hsl(var(--primary)/0.08)] blur-3xl" />
-
 			<header className="relative mb-6">
 				<h1
 					id="settings-title"
@@ -52,12 +57,60 @@ export function SettingsScreen() {
 				>
 					{t("title")}
 				</h1>
-				<div className="mt-3 h-1 w-20 rounded-full bg-[linear-gradient(90deg,hsl(var(--primary)),hsl(var(--primary)/0.2))]" />
+				<div className="mt-3 h-1 w-20 rounded-full bg-primary/20" />
 			</header>
+
+			{showInstallCard ? (
+				<div className="relative mb-5 rounded-[2rem] border border-border/70 bg-card/80 p-4 shadow-[0_20px_60px_-32px_hsl(var(--foreground)/0.45)] backdrop-blur">
+					<div className="flex items-start gap-3">
+						<div className="flex size-11 shrink-0 items-center justify-center rounded-2xl border border-border/70 bg-background/75 text-primary shadow-sm">
+							<Smartphone className="size-5" />
+						</div>
+						<div className="min-w-0 flex-1">
+							<div className="flex flex-wrap items-center gap-2">
+								<p className="text-[0.98rem] font-medium tracking-tight text-foreground">
+									{t("installTitle")}
+								</p>
+								{pwa.state === "installed" ? (
+									<Badge variant="secondary">
+										<CheckCircle2 className="size-3.5" />
+										{t("installInstalled")}
+									</Badge>
+								) : null}
+							</div>
+							<p className="mt-1 text-sm leading-5 text-muted-foreground/85">
+								{pwa.isIOS
+									? t("installIosDescription")
+									: pwa.state === "installed"
+										? t("installInstalledDescription")
+										: t("installDescription")}
+							</p>
+							{pwa.state === "available" ? (
+								pwa.isIOS ? (
+									<div className="mt-3 inline-flex min-h-12 items-center gap-2 rounded-full border border-border/70 bg-background/65 px-5 py-2 text-sm text-foreground">
+										<Share className="size-4 text-primary" />
+										<span>{t("installIosCta")}</span>
+									</div>
+								) : (
+									<Button
+										type="button"
+										size="lg"
+										className="mt-3 min-h-12 rounded-full px-6"
+										onClick={() => void pwa.install()}
+									>
+										<Download className="size-4" />
+										{t("installAction")}
+									</Button>
+								)
+							) : null}
+						</div>
+					</div>
+				</div>
+			) : null}
 
 			<div className="relative flex flex-col gap-5 xl:grid xl:grid-cols-2 xl:gap-6">
 				{/* Left column — toggles */}
-				<div className="rounded-[2rem] border border-border/70 bg-card/70 p-3 shadow-[0_20px_60px_-32px_hsl(var(--foreground)/0.45)] backdrop-blur">
+				<div className="flex flex-col py-2">
 					<ToggleRow
 						label={t("theme")}
 						checked={isDark}
@@ -97,9 +150,21 @@ export function SettingsScreen() {
 						icon={<RotateCw className="size-5" />}
 						label={t("orientation")}
 						options={[
-							{ value: "portrait", label: t("orientationPortrait") },
-							{ value: "landscape", label: t("orientationLandscape") },
-							{ value: "responsive", label: t("orientationResponsive") },
+							{
+								value: "portrait",
+								label: t("orientationPortrait"),
+								icon: <Smartphone className="size-4" />,
+							},
+							{
+								value: "landscape",
+								label: t("orientationLandscape"),
+								icon: <Smartphone className="size-4 -rotate-90" />,
+							},
+							{
+								value: "responsive",
+								label: t("orientationResponsive"),
+								icon: <RotateCw className="size-4" />,
+							},
 						]}
 						value={settings.orientationMode}
 						onChange={(next) => updateSettings({ orientationMode: next })}
@@ -115,7 +180,7 @@ export function SettingsScreen() {
 				</div>
 
 				{/* Right column — numeric inputs + metrics */}
-				<div className="rounded-[2rem] border border-border/70 bg-card/70 p-3 shadow-[0_20px_60px_-32px_hsl(var(--foreground)/0.45)] backdrop-blur">
+				<div className="flex flex-col py-2">
 					<NumberInputRow
 						label={t("weight")}
 						value={settings.weightKg}
@@ -138,12 +203,12 @@ export function SettingsScreen() {
 						onChange={(value) => updateSettings({ speedAlertKmh: value ?? 0 })}
 					/>
 					<Separator className="mx-3 bg-border/60" />
-					<div className="px-3 py-3">
-						<div className="mb-4 rounded-[1.4rem] border border-border/70 bg-background/65 px-4 py-3">
-							<p className="text-[0.98rem] font-medium tracking-tight text-foreground">
+					<div className="py-2">
+						<div className="mb-4 px-2">
+							<p className="text-base font-medium tracking-tight text-foreground">
 								{t("metricsGroup")}
 							</p>
-							<p className="mt-1 text-sm leading-5 text-muted-foreground/85">
+							<p className="mt-1 text-sm text-muted-foreground">
 								{t("metricsGroupHint")}
 							</p>
 						</div>

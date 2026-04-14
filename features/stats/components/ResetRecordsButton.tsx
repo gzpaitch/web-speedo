@@ -31,7 +31,7 @@ export function ResetRecordsButton({ onReset }: Props) {
 				variant="destructive"
 				size="lg"
 				onClick={() => setOpen(true)}
-				className="min-h-14 w-full"
+				className="min-h-14 w-full rounded-full"
 			>
 				<Trash2 className="size-4" />
 				{t("reset")}
@@ -46,12 +46,14 @@ export function ResetRecordsButton({ onReset }: Props) {
 					</DialogHeader>
 					<DialogFooter>
 						<DialogClose asChild>
-							<Button type="button" variant="outline">
+							<Button type="button" size="lg" className="min-h-12 rounded-full px-6" variant="outline">
 								{tCommon("cancel")}
 							</Button>
 						</DialogClose>
 						<Button
 							type="button"
+							size="lg"
+							className="min-h-12 rounded-full px-6"
 							variant="destructive"
 							onClick={() => {
 								onReset()

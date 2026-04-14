@@ -194,17 +194,35 @@ function sanitizeSessionDraft(raw: unknown): SessionDraft | null {
 	if (!raw || typeof raw !== "object") {
 		return null
 	}
+
 	const r = raw as Record<string, unknown>
+
 	if (
+		(r.state !== "IDLE" &&
+			r.state !== "RUNNING" &&
+			r.state !== "AUTO_PAUSED" &&
+			r.state !== "MANUALLY_PAUSED") ||
 		typeof r.startedAt !== "number" ||
+		typeof r.updatedAt !== "number" ||
 		typeof r.movementMs !== "number" ||
 		typeof r.distanceMeters !== "number" ||
 		typeof r.maxSpeedMps !== "number" ||
-		typeof r.elevationGainMeters !== "number"
+		typeof r.elevationGainMeters !== "number" ||
+		(r.lastAltitude !== null && typeof r.lastAltitude !== "number")
 	) {
 		return null
 	}
-	return raw as SessionDraft
+
+	return {
+		state: r.state,
+		startedAt: r.startedAt,
+		updatedAt: r.updatedAt,
+		movementMs: r.movementMs,
+		distanceMeters: r.distanceMeters,
+		maxSpeedMps: r.maxSpeedMps,
+		elevationGainMeters: r.elevationGainMeters,
+		lastAltitude: r.lastAltitude,
+	}
 }
 
 export function getSessionDraft(): SessionDraft | null {

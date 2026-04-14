@@ -65,6 +65,13 @@
 	},
 	"settings": {
 		"title": "Settings",
+		"installTitle": "Install app",
+		"installDescription": "Add Speedo to your home screen for fullscreen launch and faster access while riding.",
+		"installAction": "Install app",
+		"installIosDescription": "On iPhone or iPad, open this in Safari, tap Share, then choose Add to Home Screen.",
+		"installIosCta": "Safari > Share > Add to Home Screen",
+		"installInstalled": "Installed",
+		"installInstalledDescription": "Speedo is already ready to launch as an installed app on this device.",
 		"theme": "Theme",
 		"themeHint": "Resets to system when you close the app.",
 		"themeLight": "Light",

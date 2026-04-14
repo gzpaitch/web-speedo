@@ -10,18 +10,27 @@ import { MetricCard } from "./MetricCard"
 
 type Props = {
 	metrics: MetricValue[]
+	className?: string
 }
 
-function chunkPairs(metrics: MetricValue[]): MetricValue[][] {
-	const pairs: MetricValue[][] = []
-	for (let i = 0; i < metrics.length; i += 2) {
-		pairs.push(metrics.slice(i, i + 2))
+function chunkMetrics(
+	metrics: MetricValue[],
+	itemsPerPage: number
+): MetricValue[][] {
+	const pages: MetricValue[][] = []
+	for (let i = 0; i < metrics.length; i += itemsPerPage) {
+		pages.push(metrics.slice(i, i + itemsPerPage))
 	}
-	return pairs
+	return pages
 }
 
-export function MetricsCarousel({ metrics }: Props) {
-	const pairs = React.useMemo(() => chunkPairs(metrics), [metrics])
+export function MetricsCarousel({ metrics, className }: Props) {
+	const [isLandscape, setIsLandscape] = React.useState(false)
+	const itemsPerPage = isLandscape ? 4 : 2
+	const pages = React.useMemo(
+		() => chunkMetrics(metrics, itemsPerPage),
+		[metrics, itemsPerPage]
+	)
 	const [emblaRef, emblaApi] = useEmblaCarousel({
 		align: "start",
 		loop: false,
@@ -29,6 +38,25 @@ export function MetricsCarousel({ metrics }: Props) {
 		containScroll: "trimSnaps",
 	})
 	const [selected, setSelected] = React.useState(0)
+
+	React.useEffect(() => {
+		if (typeof window === "undefined") {
+			return
+		}
+
+		const mediaQuery = window.matchMedia("(orientation: landscape)")
+		const updateOrientation = () => setIsLandscape(mediaQuery.matches)
+
+		updateOrientation()
+
+		if (typeof mediaQuery.addEventListener === "function") {
+			mediaQuery.addEventListener("change", updateOrientation)
+			return () => mediaQuery.removeEventListener("change", updateOrientation)
+		}
+
+		mediaQuery.addListener(updateOrientation)
+		return () => mediaQuery.removeListener(updateOrientation)
+	}, [])
 
 	React.useEffect(() => {
 		if (!emblaApi) {
@@ -49,35 +77,60 @@ export function MetricsCarousel({ metrics }: Props) {
 	}
 
 	return (
-		<div className="w-full" data-embla-inner>
-			<div className="overflow-hidden" ref={emblaRef}>
-				<div className="flex touch-pan-y">
-					{pairs.map((pair, index) => (
+		<div className={cn("w-full", className)} data-embla-inner>
+			<div
+				key={isLandscape ? "landscape" : "portrait"}
+				className={cn("overflow-hidden", isLandscape && "h-full")}
+				ref={emblaRef}
+			>
+				<div className={cn("flex touch-pan-y", isLandscape && "h-full")}>
+					{pages.map((page, index) => (
 						<div
-							// biome-ignore lint/suspicious/noArrayIndexKey: pair identity is stable for the current snapshot
+							// biome-ignore lint/suspicious/noArrayIndexKey: page identity is stable for the current snapshot
 							key={index}
-							className="min-w-0 flex-[0_0_100%] px-1"
+							className={cn(
+								"min-w-0 flex-[0_0_100%] px-0.5",
+								isLandscape && "h-full"
+							)}
 						>
-							<div className="grid grid-cols-2 gap-3">
-								{pair.length === 1 ? (
+							<div
+								className={cn(
+									"grid grid-cols-2 gap-3",
+									isLandscape && "h-full grid-rows-2 gap-2.5"
+								)}
+							>
+								{page.length === 1 ? (
 									<div className="col-span-2 flex justify-center">
 										<div className="w-1/2">
-											<MetricCard metric={pair[0]} centered />
+											<MetricCard metric={page[0]} centered />
 										</div>
 									</div>
+								) : page.length === 3 ? (
+									<>
+										{page.slice(0, 2).map((metric) => (
+											<MetricCard key={metric.id} metric={metric} />
+										))}
+										<div className="col-span-2 flex justify-center">
+											<div className="w-1/2">
+												<MetricCard metric={page[2]} centered />
+											</div>
+										</div>
+									</>
 								) : (
-									pair.map((m) => <MetricCard key={m.id} metric={m} />)
+									page.map((metric) => (
+										<MetricCard key={metric.id} metric={metric} />
+									))
 								)}
 							</div>
 						</div>
 					))}
 				</div>
 			</div>
-			{pairs.length > 1 ? (
+			{pages.length > 1 ? (
 				<div className="mt-4 flex items-center justify-center gap-2 pb-4">
-					{pairs.map((_, index) => (
+					{pages.map((_, index) => (
 						<button
-							// biome-ignore lint/suspicious/noArrayIndexKey: dot index maps to pair slot
+							// biome-ignore lint/suspicious/noArrayIndexKey: dot index maps to page slot
 							key={index}
 							type="button"
 							onClick={() => emblaApi?.scrollTo(index)}
@@ -87,7 +140,7 @@ export function MetricsCarousel({ metrics }: Props) {
 									? "w-7 bg-foreground shadow-[0_0_18px_hsl(var(--foreground)/0.22)]"
 									: "w-2.5 bg-border/80 hover:bg-border"
 							)}
-							aria-label={`Go to metric pair ${index + 1}`}
+							aria-label={`Go to metrics page ${index + 1}`}
 							aria-pressed={selected === index}
 						/>
 					))}
