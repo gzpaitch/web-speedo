@@ -1,0 +1,93 @@
+{
+	"common": {
+		"appName": "Speedo",
+		"cancel": "Cancel",
+		"confirm": "Confirm",
+		"close": "Close",
+		"save": "Save",
+		"resume": "Resume",
+		"discard": "Discard",
+		"retry": "Try again",
+		"notAvailable": "—"
+	},
+	"onboarding": {
+		"title": "Speedo needs location access",
+		"description": "We use your device's GPS to measure your speed. Nothing is uploaded or shared.",
+		"allow": "Allow GPS",
+		"deniedTitle": "Location is blocked",
+		"deniedDescription": "Speedo can't show your speed without location access. Enable it in your browser settings and try again.",
+		"deniedPermanentlyDescription": "Location access is permanently blocked for this site. Open your browser settings, allow location for this site, and reload the page.",
+		"openSettings": "Open browser settings"
+	},
+	"gps": {
+		"waiting": "Waiting for signal",
+		"weak": "Weak signal",
+		"ok": "GPS OK"
+	},
+	"session": {
+		"pause": "Pause",
+		"resume": "Resume",
+		"end": "End",
+		"endConfirmTitle": "End session?",
+		"endConfirmDescription": "Your metrics will be saved and reset.",
+		"paused": "Paused",
+		"autoPaused": "Auto-paused",
+		"recoveryTitle": "Session in progress",
+		"recoveryDescription": "You have a paused session:",
+		"recoveryTime": "Time",
+		"recoveryDistance": "Distance"
+	},
+	"metrics": {
+		"maxSpeed": "Max",
+		"avgSpeed": "Avg",
+		"movementTime": "Moving",
+		"totalTime": "Total",
+		"currentTime": "Clock",
+		"distance": "Distance",
+		"altitude": "Altitude",
+		"elevationGain": "Climb",
+		"calories": "Calories",
+		"coords": "Coords",
+		"editTitle": "Active metrics",
+		"editHint": "Choose which metrics appear on the speedometer."
+	},
+	"units": {
+		"kmh": "km/h",
+		"mph": "mph",
+		"m": "m",
+		"km": "km",
+		"mi": "mi",
+		"kcal": "kcal"
+	},
+	"settings": {
+		"title": "Settings",
+		"theme": "Theme",
+		"themeHint": "Resets to system when you close the app.",
+		"themeLight": "Light",
+		"themeDark": "Dark",
+		"units": "Units",
+		"unitsMetric": "Metric",
+		"unitsImperial": "Imperial",
+		"keepScreenOn": "Keep screen on",
+		"keepScreenOnHint": "Prevents your phone from sleeping while riding.",
+		"wakeLockUnsupported": "Your browser doesn't support keeping the screen on.",
+		"weight": "Weight (kg)",
+		"weightHint": "Used to estimate calories.",
+		"speedAlert": "Speed alert (km/h)",
+		"speedAlertHint": "Vibrates and flashes when you go above this speed. 0 disables.",
+		"language": "Language",
+		"metricsGroup": "Speedometer metrics",
+		"metricsGroupHint": "Pick the metrics shown on the speedometer carousel."
+	},
+	"stats": {
+		"title": "Records",
+		"maxSpeed": "Top speed",
+		"longestDistance": "Longest ride",
+		"longestMovement": "Longest moving time",
+		"highestCalories": "Most calories burned",
+		"lastRecord": "Last record",
+		"reset": "Reset records",
+		"resetConfirmTitle": "Reset records?",
+		"resetConfirmDescription": "This permanently deletes all historical records."
+	}
+}

@@ -1,0 +1,93 @@
+{
+	"common": {
+		"appName": "Speedo",
+		"cancel": "Cancelar",
+		"confirm": "Confirmar",
+		"close": "Fechar",
+		"save": "Salvar",
+		"resume": "Retomar",
+		"discard": "Descartar",
+		"retry": "Tentar novamente",
+		"notAvailable": "—"
+	},
+	"onboarding": {
+		"title": "Speedo precisa de acesso à localização",
+		"description": "Usamos o GPS do seu aparelho para medir sua velocidade. Nada é enviado ou compartilhado.",
+		"allow": "Permitir GPS",
+		"deniedTitle": "Localização bloqueada",
+		"deniedDescription": "O Speedo não consegue exibir sua velocidade sem acesso à localização. Ative nas configurações do navegador e tente novamente.",
+		"deniedPermanentlyDescription": "O acesso à localização está bloqueado permanentemente para este site. Abra as configurações do navegador, libere a localização e recarregue a página.",
+		"openSettings": "Abrir configurações do navegador"
+	},
+	"gps": {
+		"waiting": "Aguardando sinal",
+		"weak": "Sinal fraco",
+		"ok": "GPS OK"
+	},
+	"session": {
+		"pause": "Pausar",
+		"resume": "Retomar",
+		"end": "Fim",
+		"endConfirmTitle": "Finalizar sessão?",
+		"endConfirmDescription": "Suas métricas serão salvas e zeradas.",
+		"paused": "Pausado",
+		"autoPaused": "Pausa automática",
+		"recoveryTitle": "Sessão em andamento",
+		"recoveryDescription": "Você tem uma sessão pausada:",
+		"recoveryTime": "Tempo",
+		"recoveryDistance": "Distância"
+	},
+	"metrics": {
+		"maxSpeed": "Máx",
+		"avgSpeed": "Méd",
+		"movementTime": "Movimento",
+		"totalTime": "Total",
+		"currentTime": "Relógio",
+		"distance": "Distância",
+		"altitude": "Altitude",
+		"elevationGain": "Subida",
+		"calories": "Calorias",
+		"coords": "Coords",
+		"editTitle": "Métricas ativas",
+		"editHint": "Escolha quais métricas aparecem no velocímetro."
+	},
+	"units": {
+		"kmh": "km/h",
+		"mph": "mph",
+		"m": "m",
+		"km": "km",
+		"mi": "mi",
+		"kcal": "kcal"
+	},
+	"settings": {
+		"title": "Ajustes",
+		"theme": "Tema",
+		"themeHint": "Volta para o tema do sistema ao fechar o app.",
+		"themeLight": "Claro",
+		"themeDark": "Escuro",
+		"units": "Unidades",
+		"unitsMetric": "Métrico",
+		"unitsImperial": "Imperial",
+		"keepScreenOn": "Manter tela ligada",
+		"keepScreenOnHint": "Evita que o celular apague durante o uso.",
+		"wakeLockUnsupported": "Seu navegador não suporta manter a tela ligada.",
+		"weight": "Peso (kg)",
+		"weightHint": "Usado para estimar calorias.",
+		"speedAlert": "Alerta de velocidade (km/h)",
+		"speedAlertHint": "Vibra e destaca quando você passa desta velocidade. 0 desativa.",
+		"language": "Idioma",
+		"metricsGroup": "Métricas do velocímetro",
+		"metricsGroupHint": "Escolha quais métricas aparecem no carrossel do velocímetro."
+	},
+	"stats": {
+		"title": "Recordes",
+		"maxSpeed": "Velocidade máxima",
+		"longestDistance": "Maior distância",
+		"longestMovement": "Maior tempo de movimento",
+		"highestCalories": "Maior gasto calórico",
+		"lastRecord": "Último recorde",
+		"reset": "Resetar recordes",
+		"resetConfirmTitle": "Resetar recordes?",
+		"resetConfirmDescription": "Isso apaga permanentemente todos os recordes históricos."
+	}
+}
