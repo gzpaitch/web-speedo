@@ -132,7 +132,6 @@ const statusBadgeMap: Record<
 type TrackingButtonConfig = {
 	label: string
 	icon: React.ElementType
-	onClick: (() => void) | undefined
 	className: string
 }
 
@@ -145,7 +144,6 @@ function resolveTrackingButton(
 		return {
 			label: "Stop tracking",
 			icon: CircleStop,
-			onClick: undefined,
 			className:
 				"border-white/10 bg-white/5 text-slate-100 hover:border-white/20 hover:bg-white/10",
 		}
@@ -155,7 +153,6 @@ function resolveTrackingButton(
 		return {
 			label: "Requesting…",
 			icon: MapPin,
-			onClick: undefined,
 			className:
 				"border-amber-400/30 bg-amber-400/10 text-amber-100 cursor-wait",
 		}
@@ -166,7 +163,6 @@ function resolveTrackingButton(
 			return {
 				label: "GPS unavailable",
 				icon: MapPinOff,
-				onClick: undefined,
 				className:
 					"border-white/10 bg-white/5 text-slate-500 cursor-not-allowed",
 			}
@@ -174,7 +170,6 @@ function resolveTrackingButton(
 			return {
 				label: "GPS denied — enable in browser settings",
 				icon: CircleX,
-				onClick: undefined,
 				className:
 					"border-rose-400/30 bg-rose-400/10 text-rose-300 cursor-not-allowed",
 			}
@@ -182,7 +177,6 @@ function resolveTrackingButton(
 			return {
 				label: "Start tracking",
 				icon: CircleCheck,
-				onClick: undefined,
 				className:
 					"border-emerald-500/30 bg-emerald-500/10 text-emerald-100 hover:border-emerald-400/60 hover:bg-emerald-500/20",
 			}
@@ -190,7 +184,6 @@ function resolveTrackingButton(
 			return {
 				label: "Allow GPS",
 				icon: MapPin,
-				onClick: undefined,
 				className:
 					"border-cyan-300/30 bg-cyan-300/10 text-cyan-50 hover:border-cyan-200/60 hover:bg-cyan-300/20",
 			}
@@ -284,6 +277,20 @@ export function SpeedometerMVP() {
 	const showInstallBanner = pwa.state === "available" && !pwa.isIOS
 	const showIOSBanner = pwa.state === "available" && pwa.isIOS
 
+	const trackingBtn = resolveTrackingButton(
+		speedometer.isWatching,
+		speedometer.isRequesting,
+		speedometer.permission
+	)
+	const TrackingIcon = trackingBtn.icon
+	const trackingOnClick = speedometer.isWatching
+		? speedometer.stop
+		: !speedometer.isRequesting &&
+				speedometer.permission !== "unsupported" &&
+				speedometer.permission !== "denied"
+			? speedometer.requestAccess
+			: undefined
+
 	return (
 		<main className="min-h-dvh overflow-hidden bg-[radial-gradient(circle_at_top,rgba(94,234,212,0.18),transparent_28%),linear-gradient(180deg,#07111a_0%,#02060a_100%)] text-slate-50">
 			<div className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-4 px-4 pt-[max(env(safe-area-inset-top),1.25rem)] pb-[max(env(safe-area-inset-bottom),1.25rem)]">
@@ -360,35 +367,18 @@ export function SpeedometerMVP() {
 
 					{/* buttons */}
 					<div className="relative mt-8 grid gap-4">
-						{(() => {
-							const btn = resolveTrackingButton(
-								speedometer.isWatching,
-								speedometer.isRequesting,
-								speedometer.permission
-							)
-							const Icon = btn.icon
-							const onClick = speedometer.isWatching
-								? speedometer.stop
-								: !speedometer.isRequesting &&
-										speedometer.permission !== "unsupported" &&
-										speedometer.permission !== "denied"
-									? speedometer.requestAccess
-									: undefined
-							return (
-								<button
-									type="button"
-									onClick={onClick}
-									disabled={onClick === undefined}
-									className={cn(
-										"inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl border px-5 text-sm font-medium transition disabled:opacity-60 disabled:cursor-not-allowed",
-										btn.className
-									)}
-								>
-									<Icon className="size-4" />
-									{btn.label}
-								</button>
-							)
-						})()}
+						<button
+							type="button"
+							onClick={trackingOnClick}
+							disabled={trackingOnClick === undefined}
+							className={cn(
+								"inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl border px-5 text-sm font-medium transition disabled:opacity-60 disabled:cursor-not-allowed",
+								trackingBtn.className
+							)}
+						>
+							<TrackingIcon className="size-4" />
+							{trackingBtn.label}
+						</button>
 						<button
 							type="button"
 							onClick={speedometer.resetStats}

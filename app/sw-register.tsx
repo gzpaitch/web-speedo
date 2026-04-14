@@ -10,9 +10,12 @@ export function ServiceWorkerRegister() {
 		if (!("serviceWorker" in navigator)) return
 
 		if (process.env.NODE_ENV !== "production") {
-			navigator.serviceWorker.getRegistrations().then((registrations) => {
-				for (const reg of registrations) reg.unregister()
-			})
+			navigator.serviceWorker
+				.getRegistrations()
+				.then((registrations) => {
+					for (const reg of registrations) reg.unregister()
+				})
+				.catch((err) => console.warn("[SW] Failed to unregister:", err))
 			return
 		}
 
