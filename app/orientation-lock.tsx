@@ -9,7 +9,7 @@ export function OrientationLock() {
 	const { orientationMode } = settings
 
 	useEffect(() => {
-		const lock = async () => {
+		const applyLock = async () => {
 			try {
 				if (typeof screen === "undefined" || !screen.orientation) {
 					return
@@ -31,12 +31,45 @@ export function OrientationLock() {
 				}
 			} catch {
 				// API not supported or not allowed (e.g. browser tab without fullscreen).
-				// The CSS @media (orientation: landscape) fallback in globals.css
-				// handles the visual rotation in those cases.
+				// Only works reliably as an installed PWA (standalone/fullscreen display mode).
+				// The CSS data-orientation-lock fallback in globals.css handles iOS and browser tabs.
 			}
 		}
 
-		lock()
+		// Expose the desired lock mode as a data attribute so the CSS fallback
+		// in globals.css can apply a transform-based rotation on iOS / browser tabs.
+		if (typeof document !== "undefined") {
+			if (orientationMode === "responsive") {
+				document.documentElement.removeAttribute("data-orientation-lock")
+			} else {
+				document.documentElement.setAttribute(
+					"data-orientation-lock",
+					orientationMode
+				)
+			}
+		}
+
+		applyLock()
+
+		// Re-apply when the page becomes visible again (after backgrounding/lock screen).
+		const onVisibilityChange = () => {
+			if (document.visibilityState === "visible") {
+				void applyLock()
+			}
+		}
+
+		// Re-apply after every device rotation so the OS cannot override the lock.
+		const onOrientationChange = () => {
+			void applyLock()
+		}
+
+		document.addEventListener("visibilitychange", onVisibilityChange)
+		screen.orientation?.addEventListener("change", onOrientationChange)
+
+		return () => {
+			document.removeEventListener("visibilitychange", onVisibilityChange)
+			screen.orientation?.removeEventListener("change", onOrientationChange)
+		}
 	}, [orientationMode])
 
 	return null

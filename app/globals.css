@@ -126,6 +126,9 @@
 	body {
 		@apply bg-background text-foreground;
 		min-height: 100dvh;
+		-webkit-touch-callout: none;
+		-webkit-user-select: none;
+		user-select: none;
 	}
 	html {
 		@apply font-sans;
@@ -133,5 +136,48 @@
 	html,
 	body {
 		overscroll-behavior: none;
+	}
+}
+
+/*
+ * CSS orientation-lock fallback for iOS Safari and browser tabs where
+ * screen.orientation.lock() is unavailable.
+ *
+ * When [data-orientation-lock="portrait"] is set but the device is in landscape,
+ * the entire viewport is rotated 90° and its dimensions are swapped so the
+ * content renders as if in portrait.
+ *
+ * When [data-orientation-lock="landscape"] is set but the device is in portrait,
+ * the opposite rotation is applied.
+ *
+ * This has no effect when screen.orientation.lock() succeeds natively (PWA/fullscreen).
+ */
+[data-orientation-lock="portrait"] {
+	@media (orientation: landscape) {
+		body {
+			width: 100dvh;
+			height: 100dvw;
+			overflow: hidden;
+			transform-origin: top left;
+			transform: rotate(-90deg) translateX(-100%);
+			position: fixed;
+			top: 0;
+			left: 0;
+		}
+	}
+}
+
+[data-orientation-lock="landscape"] {
+	@media (orientation: portrait) {
+		body {
+			width: 100dvh;
+			height: 100dvw;
+			overflow: hidden;
+			transform-origin: top left;
+			transform: rotate(90deg) translateY(-100%);
+			position: fixed;
+			top: 0;
+			left: 0;
+		}
 	}
 }
