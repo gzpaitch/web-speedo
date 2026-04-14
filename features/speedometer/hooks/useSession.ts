@@ -87,9 +87,13 @@ function handleReading(
 		maxSpeedMps = speed
 	}
 
-	// Elevation gain.
+	// Elevation gain — only accumulate rises above the noise threshold (≥2 m).
+	const ELEVATION_THRESHOLD_M = 2
 	if (reading.altitude !== null) {
-		if (lastAltitude !== null && reading.altitude > lastAltitude) {
+		if (
+			lastAltitude !== null &&
+			reading.altitude - lastAltitude >= ELEVATION_THRESHOLD_M
+		) {
 			elevationGainMeters += reading.altitude - lastAltitude
 		}
 		lastAltitude = reading.altitude
@@ -256,7 +260,8 @@ export function useSession(options: Options = {}): SessionHook {
 
 	const applyReading = React.useCallback(
 		(reading: SpeedReading) => {
-			const now = Date.now()
+			// Prefer the GPS timestamp for tighter time integration.
+			const now = reading.timestamp ?? Date.now()
 			dispatch({ type: "reading", reading, now })
 
 			const speed = reading.speedMps ?? 0

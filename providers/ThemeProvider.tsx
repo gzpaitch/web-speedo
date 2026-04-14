@@ -43,8 +43,10 @@ function applyThemeClass(resolved: ResolvedTheme): void {
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
 	const [theme, setThemeState] = React.useState<Theme>("system")
-	const [systemTheme, setSystemTheme] =
-		React.useState<ResolvedTheme>(getSystemTheme)
+	// Safe SSR default — the matchMedia effect corrects this immediately on
+	// the client, avoiding a hydration mismatch from calling window.matchMedia
+	// in the useState initializer during SSR.
+	const [systemTheme, setSystemTheme] = React.useState<ResolvedTheme>("dark")
 
 	// Track system theme changes.
 	React.useEffect(() => {

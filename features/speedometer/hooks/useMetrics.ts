@@ -54,9 +54,11 @@ export function useMetrics({
 }: Options): MetricValue[] {
 	const [clockTick, setClockTick] = React.useState(() => Date.now())
 
-	// Tick the clock every second so the `currentTime` metric updates.
+	// Tick the clock every second so time-based metrics update.
 	React.useEffect(() => {
-		if (!activeIds.includes("currentTime")) {
+		const needsTick =
+			activeIds.includes("currentTime") || activeIds.includes("totalTime")
+		if (!needsTick) {
 			return
 		}
 		const id = setInterval(() => setClockTick(Date.now()), 1_000)
@@ -66,7 +68,9 @@ export function useMetrics({
 	return React.useMemo(() => {
 		const avgMps = averageSpeedMpsFromSnapshot(snapshot)
 		const maxMps = snapshot.maxSpeedMps
-		const totalMs = snapshot.startedAt ? Date.now() - snapshot.startedAt : 0
+		// clockTick drives re-computation of time-based metrics (totalTime,
+		// currentTime) so they stay live even when snapshot hasn't changed.
+		const totalMs = snapshot.startedAt ? clockTick - snapshot.startedAt : 0
 		const calories = estimateCalories(weightKg, snapshot.movementMs)
 
 		const byId: Record<MetricId, MetricValue> = {

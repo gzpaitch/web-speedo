@@ -57,7 +57,12 @@ export function NumberInputRow({
 					}
 					const parsed = Number(raw)
 					if (Number.isFinite(parsed)) {
-						onChange(parsed)
+						// Enforce min/max before propagating — HTML attributes are
+						// only advisory and don't block out-of-range typed values.
+						let clamped = parsed
+						if (min !== undefined && clamped < min) clamped = min
+						if (max !== undefined && clamped > max) clamped = max
+						onChange(clamped)
 					}
 				}}
 				className="h-12 w-24 rounded-md border border-border bg-background px-3 text-right text-base tabular-nums text-foreground outline-none focus:border-ring"

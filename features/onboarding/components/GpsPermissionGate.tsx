@@ -55,7 +55,8 @@ export function GpsPermissionGate({ children }: { children: React.ReactNode }) {
 		return (
 			<GpsDeniedScreen
 				permanent={state === "denied-permanent" || state === "unsupported"}
-				onRetry={handleRetry}
+				// "unsupported" means the device has no GPS — retrying is pointless.
+				onRetry={state === "unsupported" ? undefined : handleRetry}
 			/>
 		)
 	}

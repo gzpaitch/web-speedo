@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 
 type Props = {
 	permanent: boolean
-	onRetry: () => void
+	onRetry?: () => void
 }
 
 export function GpsDeniedScreen({ permanent, onRetry }: Props) {
@@ -30,14 +30,16 @@ export function GpsDeniedScreen({ permanent, onRetry }: Props) {
 							: t("deniedDescription")}
 					</p>
 				</div>
-				<Button
-					type="button"
-					size="lg"
-					onClick={onRetry}
-					className="min-h-14 w-full text-base"
-				>
-					{tCommon("retry")}
-				</Button>
+				{onRetry ? (
+					<Button
+						type="button"
+						size="lg"
+						onClick={onRetry}
+						className="min-h-14 w-full text-base"
+					>
+						{tCommon("retry")}
+					</Button>
+				) : null}
 			</div>
 		</main>
 	)

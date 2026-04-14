@@ -87,9 +87,12 @@ export function SpeedometerScreen({ onSessionEnd }: Props) {
 		session.snapshot.currentSpeedMps,
 		settings.units
 	)
-	const speedValueNumber = Number.parseFloat(
-		speedDisplay.value.replace(",", ".")
-	)
+	// Use the raw m/s value converted to the display unit to avoid locale-
+	// sensitive string parsing (e.g. ".replace(',','.')" breaks in some locales).
+	const speedValueNumber =
+		settings.units === "imperial"
+			? session.snapshot.currentSpeedMps * 2.23694 // m/s → mph
+			: session.snapshot.currentSpeedMps * 3.6 // m/s → km/h
 
 	// Alert detection — fires once per threshold crossing.
 	const alertThresholdKmh = settings.speedAlertKmh

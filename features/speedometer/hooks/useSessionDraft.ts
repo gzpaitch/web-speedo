@@ -21,11 +21,20 @@ export function useSessionDraft(snapshot: SessionSnapshot): void {
 		snapshot.state === "AUTO_PAUSED" ||
 		snapshot.state === "MANUALLY_PAUSED"
 
+	// Prevent clearing the draft on the initial mount (IDLE state). Stage 9
+	// needs to read the draft before useSessionDraft can wipe it. We only
+	// clear once the session has transitioned from active → inactive.
+	const hasMountedRef = React.useRef(false)
+
 	React.useEffect(() => {
 		if (!isActive) {
-			clearSessionDraft()
+			if (hasMountedRef.current) {
+				clearSessionDraft()
+			}
+			hasMountedRef.current = true
 			return
 		}
+		hasMountedRef.current = true
 
 		const persist = () => {
 			const s = snapshotRef.current

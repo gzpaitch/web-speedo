@@ -83,12 +83,22 @@ export function MetricsEditMode({ activeIds, onToggle }: Props) {
 								const active = activeIds.includes(id)
 								return (
 									<li key={id}>
-										<button
-											type="button"
+										{/* Using a div instead of a button avoids nesting
+										    interactive controls (Switch is already interactive). */}
+										<div
+											role="checkbox"
+											aria-checked={active}
+											tabIndex={0}
 											onClick={() => onToggle(id)}
+											onKeyDown={(e) => {
+												if (e.key === " " || e.key === "Enter") {
+													e.preventDefault()
+													onToggle(id)
+												}
+											}}
 											className={cn(
-												"flex w-full items-center justify-between rounded-md px-2 py-2 text-left text-sm transition",
-												"min-h-12 hover:bg-muted"
+												"flex w-full cursor-pointer items-center justify-between rounded-md px-2 py-2 text-left text-sm transition",
+												"min-h-12 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 											)}
 										>
 											<span className="text-foreground">{t(id)}</span>
@@ -100,9 +110,11 @@ export function MetricsEditMode({ activeIds, onToggle }: Props) {
 													checked={active}
 													onCheckedChange={() => onToggle(id)}
 													className="pointer-events-none"
+													tabIndex={-1}
+													aria-hidden
 												/>
 											</span>
-										</button>
+										</div>
 									</li>
 								)
 							})}

@@ -120,7 +120,7 @@ function sanitizeSettings(raw: unknown): AppSettings {
 	return {
 		units: partial.units === "imperial" ? "imperial" : "metric",
 		language: partial.language === "pt" ? "pt" : "en",
-		keepScreenOn: Boolean(partial.keepScreenOn),
+		keepScreenOn: partial.keepScreenOn === true,
 		weightKg:
 			typeof partial.weightKg === "number" && partial.weightKg > 0
 				? partial.weightKg
@@ -182,12 +182,26 @@ export function clearRecords(): void {
 /* Session draft                                                              */
 /* -------------------------------------------------------------------------- */
 
-export function getSessionDraft(): SessionDraft | null {
-	const raw = readJson<SessionDraft | null>(STORAGE_KEYS.sessionDraft, null)
+function sanitizeSessionDraft(raw: unknown): SessionDraft | null {
 	if (!raw || typeof raw !== "object") {
 		return null
 	}
-	return raw
+	const r = raw as Record<string, unknown>
+	if (
+		typeof r.startedAt !== "number" ||
+		typeof r.movementMs !== "number" ||
+		typeof r.distanceMeters !== "number" ||
+		typeof r.maxSpeedMps !== "number" ||
+		typeof r.elevationGainMeters !== "number"
+	) {
+		return null
+	}
+	return raw as SessionDraft
+}
+
+export function getSessionDraft(): SessionDraft | null {
+	const raw = readJson<SessionDraft | null>(STORAGE_KEYS.sessionDraft, null)
+	return sanitizeSessionDraft(raw)
 }
 
 export function saveSessionDraft(draft: SessionDraft): void {
@@ -206,7 +220,12 @@ export function getGpsGrantedFlag(): boolean {
 	if (!isBrowser()) {
 		return false
 	}
-	return localStorage.getItem(STORAGE_KEYS.gpsGranted) === "1"
+	try {
+		return localStorage.getItem(STORAGE_KEYS.gpsGranted) === "1"
+	} catch {
+		// Private browsing or storage access denied.
+		return false
+	}
 }
 
 export function setGpsGrantedFlag(granted: boolean): void {

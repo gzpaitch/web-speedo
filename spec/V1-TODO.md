@@ -23,26 +23,26 @@
 ### P1 — Críticos
 
 - [x] ~~Double `onSessionEnd` callback~~ — `SpeedometerScreen` chamava o callback duas vezes (fix: 41151ce)
-- [ ] **`app/globals.css:9`** — `--font-display: var(--font-display)` é referência circular; fonte nunca é aplicada
-- [ ] **`useSessionDraft.ts`** — `clearSessionDraft()` dispara no mount quando `isActive=false`, apagando o draft antes que o Stage 9 possa recuperá-lo
-- [ ] **`useGpsPermission.ts:93`** — erros de geolocalização não relacionados a permissão são mapeados como `denied`, bloqueando o retry correto
-- [ ] **`useWakeLock.ts:63`** — o `release` listener não valida se o sentinel é o atual; um release antigo pode zerar um lock novo
+- [x] **`app/globals.css:9`** — `--font-display: var(--font-display)` é referência circular; fonte nunca é aplicada
+- [x] **`useSessionDraft.ts`** — `clearSessionDraft()` dispara no mount quando `isActive=false`, apagando o draft antes que o Stage 9 possa recuperá-lo
+- [x] **`useGpsPermission.ts:93`** — erros de geolocalização não relacionados a permissão são mapeados como `denied`, bloqueando o retry correto
+- [x] **`useWakeLock.ts:63`** — o `release` listener não valida se o sentinel é o atual; um release antigo pode zerar um lock novo
 
 ### P2 — Médios
 
-- [ ] **`useGeolocation.ts:83`** — ramo `else` final seta `weak` novamente; `weakMax` vira inefetivo. Deve usar `waiting`
-- [ ] **`SpeedometerScreen.tsx:92`** — parse do valor formatado com `.replace(",", ".")` quebra em locales que usam vírgula como separador de milhar; usar `currentSpeedMps` diretamente
-- [ ] **`useSession.ts:~260`** — usar `reading.timestamp` em vez de `Date.now()` para integração mais precisa de tempo/distância
-- [ ] **`useSession.ts:~92`** — ganho de elevação sem threshold (GPS é ruidoso); adicionar mínimo de ~2 m antes de acumular
-- [ ] **`lib/storage.ts:191`** — `getSessionDraft` sem sanitização; JSON malformado pode quebrar o reducer no hydrate
-- [ ] **`lib/storage.ts:123`** — `keepScreenOn: Boolean(x)` aceita truthy; deve exigir boolean real (`=== true`)
-- [ ] **`lib/storage.ts:209`** — `getGpsGrantedFlag` pode lançar em modo privado; envolver em try/catch
-- [ ] **`MetricsEditMode.tsx:99`** — `Switch` dentro de `<button>` = controles interativos aninhados (a11y)
-- [ ] **`GpsPermissionGate.tsx:53`** — estado `unsupported` cai em `GpsDeniedScreen` que sempre mostra botão Retry (ação não-funcional para dispositivo sem GPS)
-- [ ] **`useOrientation.ts:17`** — `useState(() => getOrientation())` calcula via `matchMedia` no initializer → mismatch SSR/hydration
-- [ ] **`ThemeProvider.tsx:47`** — `systemTheme` via `window.matchMedia` no initializer → mismatch SSR/hydration
-- [ ] **`NumberInputRow.tsx:59`** — `min`/`max` não são enforçados antes de chamar `onChange`; valores fora de range são salvos
-- [ ] **`useMetrics.ts:59`** — `totalTime` usa `Date.now()` mas o interval só roda quando `currentTime` está ativo; métrica fica estagnada quando `currentTime` não está selecionado
+- [x] **`useGeolocation.ts:83`** — ramo `else` final seta `weak` novamente; `weakMax` vira inefetivo. Deve usar `waiting`
+- [x] **`SpeedometerScreen.tsx:92`** — parse do valor formatado com `.replace(",", ".")` quebra em locales que usam vírgula como separador de milhar; usar `currentSpeedMps` diretamente
+- [x] **`useSession.ts:~260`** — usar `reading.timestamp` em vez de `Date.now()` para integração mais precisa de tempo/distância
+- [x] **`useSession.ts:~92`** — ganho de elevação sem threshold (GPS é ruidoso); adicionar mínimo de ~2 m antes de acumular
+- [x] **`lib/storage.ts:191`** — `getSessionDraft` sem sanitização; JSON malformado pode quebrar o reducer no hydrate
+- [x] **`lib/storage.ts:123`** — `keepScreenOn: Boolean(x)` aceita truthy; deve exigir boolean real (`=== true`)
+- [x] **`lib/storage.ts:209`** — `getGpsGrantedFlag` pode lançar em modo privado; envolver em try/catch
+- [x] **`MetricsEditMode.tsx:99`** — `Switch` dentro de `<button>` = controles interativos aninhados (a11y)
+- [x] **`GpsPermissionGate.tsx:53`** — estado `unsupported` cai em `GpsDeniedScreen` que sempre mostra botão Retry (ação não-funcional para dispositivo sem GPS)
+- [x] **`useOrientation.ts:17`** — `useState(() => getOrientation())` calcula via `matchMedia` no initializer → mismatch SSR/hydration
+- [x] **`ThemeProvider.tsx:47`** — `systemTheme` via `window.matchMedia` no initializer → mismatch SSR/hydration
+- [x] **`NumberInputRow.tsx:59`** — `min`/`max` não são enforçados antes de chamar `onChange`; valores fora de range são salvos
+- [x] **`useMetrics.ts:59`** — `totalTime` usa `Date.now()` mas o interval só roda quando `currentTime` está ativo; métrica fica estagnada quando `currentTime` não está selecionado
 - [ ] **`app/layout.tsx:60`** — `<html lang="en">` hardcoded não reflete o idioma ativo (PT/EN); leitores de tela anunciam em inglês mesmo no PT
 - [ ] **`app/layout.tsx:40-50`** — viewport com `maximumScale: 1` + `userScalable: false` bloqueia zoom (a11y)
 - [ ] **`SpeedometerScreen.tsx:149,164`** — `aria-label="Speedometer"` e `aria-label="Toggle focus mode"` hardcoded em inglês; usar `useTranslations("session")`

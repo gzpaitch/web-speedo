@@ -14,9 +14,9 @@ function getOrientation(): Orientation {
 }
 
 export function useOrientation(): Orientation {
-	const [orientation, setOrientation] = React.useState<Orientation>(() =>
-		getOrientation()
-	)
+	// Safe SSR default — the useEffect below corrects it on the client
+	// immediately after mount (avoids calling matchMedia during SSR).
+	const [orientation, setOrientation] = React.useState<Orientation>("portrait")
 
 	React.useEffect(() => {
 		const mql = window.matchMedia("(orientation: landscape)")

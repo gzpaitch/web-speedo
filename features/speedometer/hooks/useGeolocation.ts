@@ -81,7 +81,7 @@ export function useGeolocation(): GeolocationState {
 		} else if (accuracy <= GPS_ACCURACY.weakMax) {
 			setStatus("weak")
 		} else {
-			setStatus("weak")
+			setStatus("waiting")
 		}
 		setError(null)
 	}, [])

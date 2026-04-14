@@ -61,8 +61,12 @@ export function useWakeLock(enabled: boolean): WakeLockHook {
 			const sentinel = await api.request("screen")
 			sentinelRef.current = sentinel
 			sentinel.addEventListener("release", () => {
+				// Only clear the ref if this is still the current sentinel;
+				// a stale release event must not overwrite a newer lock.
+				if (sentinelRef.current === sentinel) {
+					sentinelRef.current = null
+				}
 				setState((prev) => ({ ...prev, isActive: false }))
-				sentinelRef.current = null
 			})
 			setState({ isActive: true, isSupported: true, error: null })
 		} catch (err) {

@@ -124,8 +124,8 @@ export function useGpsPermission(): QueryResult {
 					resolve("granted")
 				},
 				(error) => {
-					setGpsGrantedFlag(false)
 					if (error.code === error.PERMISSION_DENIED) {
+						setGpsGrantedFlag(false)
 						deniedAttemptsRef.current += 1
 						const next: GpsPermissionState =
 							deniedAttemptsRef.current >= 2 ? "denied-permanent" : "denied"
@@ -133,8 +133,10 @@ export function useGpsPermission(): QueryResult {
 						resolve(next)
 						return
 					}
-					setState("denied")
-					resolve("denied")
+					// Non-permission errors (TIMEOUT, POSITION_UNAVAILABLE) — keep
+					// existing granted flag, let user retry.
+					setState("prompt")
+					resolve("prompt")
 				},
 				{ enableHighAccuracy: true, timeout: 10_000, maximumAge: 0 }
 			)
