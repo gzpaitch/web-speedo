@@ -49,7 +49,7 @@ export function MetricsCarousel({ metrics }: Props) {
 	}
 
 	return (
-		<div className="w-full">
+		<div className="w-full" data-embla-inner>
 			<div className="overflow-hidden" ref={emblaRef}>
 				<div className="flex touch-pan-y">
 					{pairs.map((pair, index) => (

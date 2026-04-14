@@ -1,7 +1,7 @@
 # Speedo v1.0 — TODO
 
 **Branch:** `claude/plan-app-development-pGrxT`
-**Última atualização:** Stages 0-7 concluídos, bugs de PR em aberto.
+**Última atualização:** Stages 0-9 concluídos; seguem pendências de verificação em device/PWA e 3 itens de bug/documentação mantidos em aberto.
 
 ---
 
@@ -66,17 +66,17 @@
 
 ### Stage 8 — Shell e navegação
 
-- [ ] `components/ui/AppShell.tsx` — Embla externo com 3 telas (`startIndex: 1` → speedometer no centro)
-- [ ] `components/ui/SlideIndicator.tsx` — dots de navegação
-- [ ] Validar que o Embla externo (telas) não conflita com o Embla interno (métricas)
-- [ ] Atualizar `app/page.tsx`: `GpsPermissionGate → AppShell`
+- [x] `components/ui/AppShell.tsx` — Embla externo com 3 telas (`startIndex: 1` → speedometer no centro)
+- [x] `components/ui/SlideIndicator.tsx` — dots de navegação
+- [x] Validar que o Embla externo (telas) não conflita com o Embla interno (métricas)
+- [x] Atualizar `app/page.tsx`: `GpsPermissionGate → AppShell`
 
 ### Stage 9 — Session recovery
 
-- [ ] `components/ui/SessionRecoveryModal.tsx`
-- [ ] No mount do AppShell: detectar `speedo:session_draft` e abrir modal com tempo + distância
-- [ ] Retomar → `useSession.hydrate(draft)`, estado `MANUALLY_PAUSED`
-- [ ] Descartar → `clearSessionDraft()`, inicia do zero
+- [x] `components/ui/SessionRecoveryModal.tsx`
+- [x] No mount do AppShell: detectar `speedo:session_draft` e abrir modal com tempo + distância
+- [x] Retomar → `useSession.hydrate(draft)`, estado `MANUALLY_PAUSED`
+- [x] Descartar → `clearSessionDraft()`, inicia do zero
 
 ### Stage 10 — Verificação de Wake Lock e alertas
 

@@ -13,6 +13,7 @@ import {
 	useSession,
 } from "@/features/speedometer/hooks/useSession"
 import { useSessionDraft } from "@/features/speedometer/hooks/useSessionDraft"
+import type { SessionDraft } from "@/features/speedometer/types"
 import { formatSpeed } from "@/features/speedometer/utils/metrics"
 import { mpsToKmh } from "@/features/speedometer/utils/speed"
 import { cn } from "@/lib/utils"
@@ -25,9 +26,15 @@ import { SessionControls } from "./SessionControls"
 
 type Props = {
 	onSessionEnd?: (summary: SessionFinalSummary) => void
+	recoveryDraft?: SessionDraft | null
+	onRecoveryApplied?: () => void
 }
 
-export function SpeedometerScreen({ onSessionEnd }: Props) {
+export function SpeedometerScreen({
+	onSessionEnd,
+	recoveryDraft = null,
+	onRecoveryApplied,
+}: Props) {
 	const t = useTranslations("session")
 	const { settings } = useSettings()
 	const { activeIds, toggle } = useActiveMetrics()
@@ -37,6 +44,15 @@ export function SpeedometerScreen({ onSessionEnd }: Props) {
 		onSessionEnd,
 	})
 	const focus = useFocusMode()
+	const hydrateSession = session.hydrate
+
+	React.useEffect(() => {
+		if (!recoveryDraft) {
+			return
+		}
+		hydrateSession(recoveryDraft)
+		onRecoveryApplied?.()
+	}, [recoveryDraft, hydrateSession, onRecoveryApplied])
 
 	// Start the GPS watch as soon as the screen mounts (permission is guaranteed
 	// by the upstream gate).
