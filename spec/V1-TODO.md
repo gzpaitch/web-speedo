@@ -47,7 +47,7 @@
 - [ ] **`app/layout.tsx:40-50`** — viewport com `maximumScale: 1` + `userScalable: false` bloqueia zoom (a11y) — **intencional para PWA de ciclismo (PRD §2)**
 - [x] **`SpeedometerScreen.tsx:149,164`** — `aria-label="Speedometer"` e `aria-label="Toggle focus mode"` hardcoded em inglês; usar `useTranslations("session")`
 - [x] **`SettingsScreen.tsx:124-128`** — texto `"loading settings"` hardcoded em inglês (deveria usar `t("loading")`)
-- [ ] **`components/ui/dialog.tsx:41-43`** — variantes Tailwind inválidas `data-open:` / `data-closed:`; deveria ser `data-[state=open]:` / `data-[state=closed]:` — **requer verificação; shadcn pode usar atributos custom**
+- [x] **`components/ui/dialog.tsx:41-43`** — variantes Tailwind inválidas `data-open:` / `data-closed:`; corrigido para `data-[state=open]:` / `data-[state=closed]:`. Radix emite `data-state="open|closed"`; variante antiga nunca disparava animação. Mesmo bug também corrigido em `components/ui/drawer.tsx:40`
 - [x] **`metrics.ts:113-118`** — `formatCoords` não checa `Number.isFinite(lat/lon)`; retornaria `"NaN"` para coords inválidas
 - [x] **`lib/calories.ts:14-19`** — sem guard `Number.isFinite(weightKg)` / `Number.isFinite(movementMs)`; aceita `Infinity`
 - [x] **`StatsScreen.tsx:33-35`** — `onHookReady?.(recordsHook)` dispara em todo render porque `recordsHook` é novo objeto a cada render
