@@ -197,12 +197,7 @@ export function SpeedometerScreen({ onSessionEnd }: Props) {
 						sessionState={session.snapshot.state}
 						onPause={session.pause}
 						onResume={session.resume}
-						onEnd={() => {
-							const summary = session.end()
-							if (summary) {
-								onSessionEnd?.(summary)
-							}
-						}}
+						onEnd={session.end}
 					/>
 				</div>
 			</div>
@@ -234,12 +229,7 @@ export function SpeedometerScreen({ onSessionEnd }: Props) {
 						sessionState={session.snapshot.state}
 						onPause={session.pause}
 						onResume={session.resume}
-						onEnd={() => {
-							const summary = session.end()
-							if (summary) {
-								onSessionEnd?.(summary)
-							}
-						}}
+						onEnd={session.end}
 					/>
 				</div>
 			</div>
