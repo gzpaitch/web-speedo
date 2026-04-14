@@ -17,7 +17,7 @@ export function formatSpeed(
 	const converted = units === "metric" ? mpsToKmh(mps) : mpsToMph(mps)
 	const maximumFractionDigits = converted >= 10 ? 0 : 1
 	return {
-		value: converted.toLocaleString(undefined, {
+		value: converted.toLocaleString("en-US", {
 			maximumFractionDigits,
 			minimumFractionDigits: maximumFractionDigits,
 		}),
@@ -42,7 +42,7 @@ export function formatDistance(
 		}
 		const km = metersToKilometers(meters)
 		return {
-			value: km.toLocaleString(undefined, {
+			value: km.toLocaleString("en-US", {
 				maximumFractionDigits: km >= 10 ? 1 : 2,
 				minimumFractionDigits: km >= 10 ? 1 : 2,
 			}),
@@ -52,7 +52,7 @@ export function formatDistance(
 
 	const mi = metersToMiles(meters)
 	return {
-		value: mi.toLocaleString(undefined, {
+		value: mi.toLocaleString("en-US", {
 			maximumFractionDigits: mi >= 10 ? 1 : 2,
 			minimumFractionDigits: mi >= 10 ? 1 : 2,
 		}),
@@ -119,14 +119,31 @@ export function formatCoords(
 		return { value: "—", unit: "" }
 	}
 	return {
-		value: `${lat.toFixed(4)}, ${lon.toFixed(4)}`,
+		value: `${lat.toFixed(4)},\n${lon.toFixed(4)}`,
 		unit: "",
 	}
 }
 
-export function formatClockTime(timestamp: number, locale?: string): string {
-	return new Intl.DateTimeFormat(locale, {
+export function formatClockTime(
+	timestamp: number,
+	locale?: string
+): { value: string; unit: string } {
+	const formatter = new Intl.DateTimeFormat(locale, {
 		hour: "2-digit",
 		minute: "2-digit",
-	}).format(timestamp)
+	})
+	const parts = formatter.formatToParts(timestamp)
+
+	let value = ""
+	let unit = ""
+
+	for (const part of parts) {
+		if (part.type === "dayPeriod") {
+			unit = part.value
+		} else {
+			value += part.value
+		}
+	}
+
+	return { value: value.trim(), unit: unit.trim() }
 }

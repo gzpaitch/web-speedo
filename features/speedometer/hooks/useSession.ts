@@ -56,6 +56,7 @@ type ReadingAction = {
 }
 type Action =
 	| ReadingAction
+	| { type: "manualStart"; now: number }
 	| { type: "manualPause"; now: number }
 	| { type: "autoPause"; now: number }
 	| { type: "manualResume"; now: number }
@@ -82,33 +83,29 @@ function handleReading(
 		lastTickAt,
 	} = state
 
-	// Max speed is always tracked.
-	if (speed > maxSpeedMps) {
-		maxSpeedMps = speed
-	}
-
-	// Elevation gain — only accumulate rises above the noise threshold (≥2 m).
-	const ELEVATION_THRESHOLD_M = 2
-	if (reading.altitude !== null) {
-		if (
-			lastAltitude !== null &&
-			reading.altitude - lastAltitude >= ELEVATION_THRESHOLD_M
-		) {
-			elevationGainMeters += reading.altitude - lastAltitude
-		}
-		lastAltitude = reading.altitude
-	}
-
 	// Phase transitions.
 	if (phase === "IDLE") {
-		if (speed >= AUTO_START_SPEED_MPS) {
-			phase = "RUNNING"
-			startedAt = now
-			lastTickAt = now
-			lastLatitude = reading.latitude
-			lastLongitude = reading.longitude
-		}
+		lastLatitude = reading.latitude
+		lastLongitude = reading.longitude
+		lastAltitude = reading.altitude
 	} else if (phase === "RUNNING") {
+		// Max speed is only tracked after the session has started.
+		if (speed > maxSpeedMps) {
+			maxSpeedMps = speed
+		}
+
+		// Elevation gain — only accumulate rises above the noise threshold (≥2 m).
+		const ELEVATION_THRESHOLD_M = 2
+		if (reading.altitude !== null) {
+			if (
+				lastAltitude !== null &&
+				reading.altitude - lastAltitude >= ELEVATION_THRESHOLD_M
+			) {
+				elevationGainMeters += reading.altitude - lastAltitude
+			}
+			lastAltitude = reading.altitude
+		}
+
 		const prevTick = lastTickAt ?? now
 		const dt = Math.max(0, now - prevTick)
 
@@ -132,14 +129,23 @@ function handleReading(
 		lastLongitude = reading.longitude
 		lastTickAt = now
 	} else if (phase === "AUTO_PAUSED") {
+		if (speed > maxSpeedMps) {
+			maxSpeedMps = speed
+		}
+
 		if (speed >= AUTO_START_SPEED_MPS) {
 			phase = "RUNNING"
 		}
+		lastAltitude = reading.altitude
 		lastLatitude = reading.latitude
 		lastLongitude = reading.longitude
 		lastTickAt = now
 	} else {
 		// MANUALLY_PAUSED — keep coords fresh, no accumulation.
+		if (speed > maxSpeedMps) {
+			maxSpeedMps = speed
+		}
+		lastAltitude = reading.altitude
 		lastLatitude = reading.latitude
 		lastLongitude = reading.longitude
 		lastTickAt = now
@@ -164,6 +170,17 @@ function reducer(state: SessionSnapshot, action: Action): SessionSnapshot {
 	switch (action.type) {
 		case "reading":
 			return handleReading(state, action)
+
+		case "manualStart":
+			if (state.state !== "IDLE") {
+				return state
+			}
+			return {
+				...state,
+				state: "RUNNING",
+				startedAt: action.now,
+				lastTickAt: action.now,
+			}
 
 		case "manualPause":
 			if (state.state === "IDLE") {
@@ -215,6 +232,7 @@ export type SessionFinalSummary = {
 
 export type SessionHook = {
 	snapshot: SessionSnapshot
+	start: () => void
 	applyReading: (reading: SpeedReading) => void
 	pause: () => void
 	resume: () => void
@@ -236,7 +254,7 @@ type Options = {
  *                  ↘ MANUALLY_PAUSED ↗
  *
  * Transitions:
- *  - Auto-start when speed ≥ AUTO_START_SPEED_MPS (first time).
+ *  - Manual start via the UI.
  *  - Auto-pause after AUTO_PAUSE_DELAY_MS of continuous ~0 speed.
  *  - Manual pause/resume via the UI buttons.
  *  - `end()` returns a final summary and resets to IDLE.
@@ -256,6 +274,10 @@ export function useSession(options: Options = {}): SessionHook {
 			clearTimeout(autoPauseTimerRef.current)
 			autoPauseTimerRef.current = null
 		}
+	}, [])
+
+	const start = React.useCallback(() => {
+		dispatch({ type: "manualStart", now: Date.now() })
 	}, [])
 
 	const applyReading = React.useCallback(
@@ -326,7 +348,7 @@ export function useSession(options: Options = {}): SessionHook {
 		return clearAutoPauseTimer
 	}, [clearAutoPauseTimer])
 
-	return { snapshot, applyReading, pause, resume, end, hydrate, reset }
+	return { snapshot, start, applyReading, pause, resume, end, hydrate, reset }
 }
 
 /** Compute average speed (m/s) live from a snapshot. */

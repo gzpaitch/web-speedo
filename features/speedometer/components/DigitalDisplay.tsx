@@ -28,7 +28,7 @@ export function DigitalDisplay({
 	unit,
 	dimmed = false,
 	alerting = false,
-	sizeClassName = "text-[18rem] leading-none landscape:text-[12rem]",
+	sizeClassName = "text-[min(42vw,16rem)] leading-none landscape:text-[12rem]",
 }: Props) {
 	const spring = useSpring(value, {
 		stiffness: 80,
@@ -50,15 +50,16 @@ export function DigitalDisplay({
 	return (
 		<div
 			className={cn(
-				"flex flex-col items-center justify-center font-display tabular-nums transition-opacity duration-300",
+				"relative flex flex-col items-center justify-center font-display tabular-nums transition-opacity duration-300",
 				dimmed && "opacity-40"
 			)}
 		>
+			<div className="pointer-events-none absolute inset-x-[-12%] top-1/2 h-36 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,hsl(var(--primary)/0.12),transparent_68%)] blur-2xl" />
 			<AnimatePresence>
 				<motion.span
 					key="speed"
 					className={cn(
-						"text-foreground",
+						"relative text-foreground drop-shadow-[0_20px_30px_hsl(var(--foreground)/0.08)]",
 						sizeClassName,
 						alerting &&
 							"animate-pulse text-destructive drop-shadow-[0_0_18px_rgb(var(--destructive))]"
@@ -70,7 +71,7 @@ export function DigitalDisplay({
 					<motion.span>{display}</motion.span>
 				</motion.span>
 			</AnimatePresence>
-			<span className="mt-1 text-2xl uppercase tracking-[0.3em] text-muted-foreground opacity-70">
+			<span className="-mt-3 text-[1.35rem] uppercase tracking-[0.34em] text-muted-foreground/80">
 				{unit}
 			</span>
 		</div>

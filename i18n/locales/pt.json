@@ -1,6 +1,7 @@
 {
 	"common": {
 		"appName": "Speedo",
+		"theme": "Alternar tema",
 		"cancel": "Cancelar",
 		"confirm": "Confirmar",
 		"close": "Fechar",
@@ -25,6 +26,7 @@
 		"ok": "GPS OK"
 	},
 	"session": {
+		"start": "Iniciar",
 		"pause": "Pausar",
 		"resume": "Retomar",
 		"end": "Fim",
@@ -70,6 +72,10 @@
 		"units": "Unidades",
 		"unitsMetric": "Métrico",
 		"unitsImperial": "Imperial",
+		"orientation": "Orientação",
+		"orientationPortrait": "Portrait",
+		"orientationLandscape": "Landscape",
+		"orientationResponsive": "Responsivo",
 		"keepScreenOn": "Manter tela ligada",
 		"keepScreenOnHint": "Evita que o celular apague durante o uso.",
 		"wakeLockUnsupported": "Seu navegador não suporta manter a tela ligada.",

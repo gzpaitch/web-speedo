@@ -85,8 +85,7 @@ export function useMetrics({
 			},
 			currentTime: {
 				id: "currentTime",
-				value: formatClockTime(clockTick),
-				unit: "",
+				...formatClockTime(clockTick),
 			},
 			distance: {
 				id: "distance",

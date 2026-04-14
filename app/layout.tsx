@@ -4,6 +4,7 @@ import { Bebas_Neue, Geist_Mono, Inter } from "next/font/google"
 import "./globals.css"
 import { cn } from "@/lib/utils"
 import { AppProviders } from "@/providers/AppProviders"
+import { OrientationLock } from "./orientation-lock"
 import { ServiceWorkerRegister } from "./sw-register"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
@@ -69,6 +70,7 @@ export default function RootLayout({
 		>
 			<body className="min-h-dvh bg-background text-foreground">
 				<AppProviders>{children}</AppProviders>
+				<OrientationLock />
 				<ServiceWorkerRegister />
 			</body>
 		</html>

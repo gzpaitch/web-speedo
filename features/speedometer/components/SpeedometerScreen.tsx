@@ -1,8 +1,10 @@
 "use client"
 
+import { Moon, Sun } from "lucide-react"
 import { useTranslations } from "next-intl"
 import * as React from "react"
 
+import { Button } from "@/components/ui/button"
 import { useSettings } from "@/features/settings/hooks/useSettings"
 import { useActiveMetrics } from "@/features/speedometer/hooks/useActiveMetrics"
 import { useFocusMode } from "@/features/speedometer/hooks/useFocusMode"
@@ -17,6 +19,7 @@ import type { SessionDraft } from "@/features/speedometer/types"
 import { formatSpeed } from "@/features/speedometer/utils/metrics"
 import { mpsToKmh } from "@/features/speedometer/utils/speed"
 import { cn } from "@/lib/utils"
+import { useTheme } from "@/providers/ThemeProvider"
 
 import { DigitalDisplay } from "./DigitalDisplay"
 import { GpsStatus } from "./GpsStatus"
@@ -36,9 +39,16 @@ export function SpeedometerScreen({
 	onRecoveryApplied,
 }: Props) {
 	const t = useTranslations("session")
+	const tCommon = useTranslations("common")
 	const { settings } = useSettings()
 	const { activeIds, toggle } = useActiveMetrics()
 	const { reading, status, isWatching, start } = useGeolocation()
+	const { resolvedTheme, setTheme } = useTheme()
+	const isDark = resolvedTheme === "dark"
+	const toggleTheme = React.useCallback(() => {
+		setTheme(isDark ? "light" : "dark")
+	}, [isDark, setTheme])
+
 	const session = useSession({
 		weightKg: settings.weightKg,
 		onSessionEnd,
@@ -167,10 +177,13 @@ export function SpeedometerScreen({
 		<section
 			className={cn(
 				"relative flex h-full min-h-dvh w-full flex-col bg-background text-foreground",
-				"px-6 pt-[max(env(safe-area-inset-top),1rem)] pb-[max(env(safe-area-inset-bottom),1rem)]"
+				"px-6 pt-[max(env(safe-area-inset-top),1rem)] pb-[calc(max(env(safe-area-inset-bottom),1rem)+3rem)]"
 			)}
 			aria-label={t("speedometerLabel")}
 		>
+			<div className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-[radial-gradient(circle_at_top,hsl(var(--primary)/0.18),transparent_60%)] opacity-90" />
+			<div className="pointer-events-none absolute right-0 bottom-12 size-52 rounded-full bg-[hsl(var(--primary)/0.07)] blur-3xl" />
+
 			{/* Full-screen tap target for focus-mode toggling during a run.
 			    Sits below interactive controls in the stacking order. */}
 			{session.snapshot.state === "RUNNING" ? (
@@ -184,35 +197,57 @@ export function SpeedometerScreen({
 			) : null}
 			{/* Portrait layout */}
 			<div className="relative z-10 flex h-full flex-col landscape:hidden">
-				<div className="flex justify-center pt-2">
+				<div className="flex items-center gap-2 pt-2">
 					<GpsStatus status={status} />
 				</div>
 
 				{pausedLabel ? (
-					<p className="mt-2 text-center text-xs uppercase tracking-[0.3em] text-muted-foreground">
+					<p className="mt-3 text-center text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
 						{pausedLabel}
 					</p>
 				) : null}
 
-				<div className="flex flex-1 items-center justify-center">
-					<DigitalDisplay
-						value={speedValueNumber}
-						unit={speedDisplay.unit}
-						dimmed={dimmed}
-						alerting={isAlerting}
-					/>
+				<div className="flex flex-1 items-center justify-center py-4">
+					<div className="flex w-full items-center justify-center rounded-[2rem] border border-border/70 bg-card/65 px-4 py-8 shadow-[0_20px_60px_-32px_hsl(var(--foreground)/0.45)] backdrop-blur">
+						<DigitalDisplay
+							value={speedValueNumber}
+							unit={speedDisplay.unit}
+							dimmed={dimmed}
+							alerting={isAlerting}
+						/>
+					</div>
 				</div>
 
 				{!focus.isFocused ? (
 					<div className="space-y-4">
-						<MetricsEditMode activeIds={activeIds} onToggle={toggle} />
-						<MetricsCarousel metrics={metrics} />
+						<div className="rounded-[2rem] border border-border/70 bg-card/65 p-3 shadow-[0_20px_60px_-32px_hsl(var(--foreground)/0.3)] backdrop-blur">
+							<MetricsCarousel metrics={metrics} />
+						</div>
+						<div className="flex items-center justify-center gap-3">
+							<MetricsEditMode activeIds={activeIds} onToggle={toggle} />
+							<Button
+								type="button"
+								variant="outline"
+								size="icon"
+								className="size-11 rounded-full border-border/70 bg-background/80 text-muted-foreground shadow-sm backdrop-blur hover:text-foreground"
+								onClick={toggleTheme}
+								aria-label={tCommon("theme")}
+								title={tCommon("theme")}
+							>
+								{isDark ? (
+									<Sun className="size-5" />
+								) : (
+									<Moon className="size-5" />
+								)}
+							</Button>
+						</div>
 					</div>
 				) : null}
 
 				<div className="mt-6">
 					<SessionControls
 						sessionState={session.snapshot.state}
+						onStart={session.start}
 						onPause={session.pause}
 						onResume={session.resume}
 						onEnd={session.end}
@@ -222,8 +257,8 @@ export function SpeedometerScreen({
 
 			{/* Landscape layout */}
 			<div className="relative z-10 hidden h-full flex-row items-stretch gap-4 landscape:flex">
-				<div className="flex flex-1 flex-col">
-					<div className="flex justify-start pt-2">
+				<div className="flex flex-1 flex-col rounded-[2rem] border border-border/70 bg-card/65 p-4 shadow-[0_20px_60px_-32px_hsl(var(--foreground)/0.45)] backdrop-blur">
+					<div className="flex items-center gap-2 pt-2">
 						<GpsStatus status={status} />
 					</div>
 					<div className="flex flex-1 items-center justify-center">
@@ -239,12 +274,32 @@ export function SpeedometerScreen({
 				<div className="flex w-1/2 flex-col justify-between gap-4 py-2">
 					{!focus.isFocused ? (
 						<>
-							<MetricsEditMode activeIds={activeIds} onToggle={toggle} />
-							<MetricsCarousel metrics={metrics} />
+							<div className="rounded-[2rem] border border-border/70 bg-card/65 p-3 shadow-[0_20px_60px_-32px_hsl(var(--foreground)/0.3)] backdrop-blur">
+								<MetricsCarousel metrics={metrics} />
+							</div>
+							<div className="flex items-center justify-center gap-3">
+								<MetricsEditMode activeIds={activeIds} onToggle={toggle} />
+								<Button
+									type="button"
+									variant="outline"
+									size="icon"
+									className="size-11 rounded-full border-border/70 bg-background/80 text-muted-foreground shadow-sm backdrop-blur hover:text-foreground"
+									onClick={toggleTheme}
+									aria-label={tCommon("theme")}
+									title={tCommon("theme")}
+								>
+									{isDark ? (
+										<Sun className="size-5" />
+									) : (
+										<Moon className="size-5" />
+									)}
+								</Button>
+							</div>
 						</>
 					) : null}
 					<SessionControls
 						sessionState={session.snapshot.state}
+						onStart={session.start}
 						onPause={session.pause}
 						onResume={session.resume}
 						onEnd={session.end}

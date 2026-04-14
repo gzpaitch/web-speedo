@@ -1,9 +1,9 @@
 "use client"
 
-import { AnimatePresence, motion } from "framer-motion"
-import { Check, Pencil, X } from "lucide-react"
+import { Check, Pencil, SlidersHorizontal, X } from "lucide-react"
 import { useTranslations } from "next-intl"
 import * as React from "react"
+import { Drawer } from "vaul"
 
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
@@ -19,109 +19,100 @@ type Props = {
 export function MetricsEditMode({ activeIds, onToggle }: Props) {
 	const t = useTranslations("metrics")
 	const [open, setOpen] = React.useState(false)
-	const containerRef = React.useRef<HTMLDivElement | null>(null)
-
-	React.useEffect(() => {
-		if (!open) {
-			return
-		}
-		const onPointerDown = (event: MouseEvent | TouchEvent) => {
-			if (!containerRef.current) {
-				return
-			}
-			if (!containerRef.current.contains(event.target as Node)) {
-				setOpen(false)
-			}
-		}
-		document.addEventListener("mousedown", onPointerDown)
-		document.addEventListener("touchstart", onPointerDown)
-		return () => {
-			document.removeEventListener("mousedown", onPointerDown)
-			document.removeEventListener("touchstart", onPointerDown)
-		}
-	}, [open])
 
 	return (
-		<div className="relative flex justify-end">
-			<Button
-				type="button"
-				size="icon"
-				variant="ghost"
-				onClick={() => setOpen((prev) => !prev)}
-				className="size-12 min-h-12 min-w-12"
-				aria-label={t("editTitle")}
-			>
-				<Pencil className="size-5" />
-			</Button>
-			<AnimatePresence>
-				{open ? (
-					<motion.div
-						ref={containerRef}
-						initial={{ opacity: 0, scale: 0.95, y: -8 }}
-						animate={{ opacity: 1, scale: 1, y: 0 }}
-						exit={{ opacity: 0, scale: 0.95, y: -8 }}
-						transition={{ duration: 0.15 }}
-						className="absolute right-0 top-full z-20 mt-2 w-64 rounded-xl border border-border bg-background p-4 shadow-lg"
+		<div className="relative flex justify-center">
+			<Drawer.Root open={open} onOpenChange={setOpen}>
+				<Drawer.Trigger asChild>
+					<Button
+						type="button"
+						variant="outline"
+						size="icon"
+						className="size-11 rounded-full border-border/70 bg-background/80 shadow-sm backdrop-blur"
+						aria-label={t("editTitle")}
+						title={t("editTitle")}
 					>
-						<div className="mb-3 flex items-start justify-between">
-							<div>
-								<p className="text-sm font-semibold">{t("editTitle")}</p>
-								<p className="text-xs text-muted-foreground">{t("editHint")}</p>
+						<Pencil className="size-4.5" />
+					</Button>
+				</Drawer.Trigger>
+				<Drawer.Portal>
+					<Drawer.Overlay className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm" />
+					<Drawer.Content className="fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-[2rem] border border-border/70 bg-background/96 outline-none backdrop-blur">
+						<div className="mx-auto mt-4 h-1.5 w-[60px] rounded-full bg-muted" />
+						<div className="p-6 pb-12">
+							<div className="mb-6 flex items-start justify-between">
+								<div className="flex items-start gap-3">
+									<div className="flex size-11 shrink-0 items-center justify-center rounded-2xl border border-border/70 bg-background/80 text-muted-foreground shadow-sm">
+										<SlidersHorizontal className="size-5" />
+									</div>
+									<div>
+										<Drawer.Title className="text-xl font-semibold tracking-tight">
+											{t("editTitle")}
+										</Drawer.Title>
+										<Drawer.Description className="mt-1 text-sm text-muted-foreground">
+											{t("editHint")}
+										</Drawer.Description>
+									</div>
+								</div>
+								<Drawer.Close asChild>
+									<Button
+										type="button"
+										size="icon-sm"
+										variant="ghost"
+										aria-label="Close"
+										className="rounded-full border border-border/70 bg-background/70"
+									>
+										<X className="size-4" />
+									</Button>
+								</Drawer.Close>
 							</div>
-							<Button
-								type="button"
-								size="icon-sm"
-								variant="ghost"
-								onClick={() => setOpen(false)}
-								aria-label="Close"
-							>
-								<X className="size-4" />
-							</Button>
-						</div>
-						<ul className="space-y-1.5">
-							{ALL_METRIC_IDS.map((id) => {
-								const active = activeIds.includes(id)
-								return (
-									<li key={id}>
-										{/* Using a div instead of a button avoids nesting
-										    interactive controls (Switch is already interactive). */}
-										<div
-											role="checkbox"
-											aria-checked={active}
-											tabIndex={0}
-											onClick={() => onToggle(id)}
-											onKeyDown={(e) => {
-												if (e.key === " " || e.key === "Enter") {
-													e.preventDefault()
-													onToggle(id)
-												}
-											}}
-											className={cn(
-												"flex w-full cursor-pointer items-center justify-between rounded-md px-2 py-2 text-left text-sm transition",
-												"min-h-12 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-											)}
-										>
-											<span className="text-foreground">{t(id)}</span>
-											<span className="flex items-center gap-2">
-												{active ? (
-													<Check className="size-4 text-foreground" />
-												) : null}
-												<Switch
+							<ul className="space-y-3">
+								{ALL_METRIC_IDS.map((id) => {
+									const active = activeIds.includes(id)
+									return (
+										<li key={id}>
+											<label
+												className={cn(
+													"flex w-full cursor-pointer items-center justify-between rounded-[1.4rem] border border-border/70 bg-card/70 p-4 transition-all shadow-sm",
+													"hover:-translate-y-0.5 hover:bg-card/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+													active && "border-primary/30 bg-primary/5"
+												)}
+											>
+												<input
+													type="checkbox"
+													className="sr-only"
 													checked={active}
-													onCheckedChange={() => onToggle(id)}
-													className="pointer-events-none"
-													tabIndex={-1}
-													aria-hidden
+													onChange={() => onToggle(id)}
 												/>
-											</span>
-										</div>
-									</li>
-								)
-							})}
-						</ul>
-					</motion.div>
-				) : null}
-			</AnimatePresence>
+												<div className="flex items-center gap-3">
+													<div className="flex size-10 items-center justify-center rounded-2xl border border-border/70 bg-background/80 text-muted-foreground">
+														<SlidersHorizontal className="size-4" />
+													</div>
+													<span className="font-semibold tracking-wide text-foreground">
+														{t(id)}
+													</span>
+												</div>
+												<span className="flex items-center gap-3">
+													{active ? (
+														<Check className="size-5 text-primary" />
+													) : null}
+													<Switch
+														checked={active}
+														onCheckedChange={() => onToggle(id)}
+														className="pointer-events-none"
+														tabIndex={-1}
+														aria-hidden
+													/>
+												</span>
+											</label>
+										</li>
+									)
+								})}
+							</ul>
+						</div>
+					</Drawer.Content>
+				</Drawer.Portal>
+			</Drawer.Root>
 		</div>
 	)
 }

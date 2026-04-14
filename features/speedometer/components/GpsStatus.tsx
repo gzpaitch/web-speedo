@@ -3,7 +3,6 @@
 import { AnimatePresence, motion } from "framer-motion"
 import { useTranslations } from "next-intl"
 
-import { Badge } from "@/components/ui/badge"
 import type { GpsStatus as GpsStatusValue } from "@/features/speedometer/types"
 import { cn } from "@/lib/utils"
 
@@ -13,8 +12,8 @@ type Props = {
 
 const DOT_COLOR: Record<GpsStatusValue, string> = {
 	waiting: "bg-muted-foreground",
-	weak: "bg-yellow-500",
-	ok: "bg-green-500",
+	weak: "bg-amber-500",
+	ok: "bg-emerald-500",
 }
 
 export function GpsStatus({ status }: Props) {
@@ -29,19 +28,12 @@ export function GpsStatus({ status }: Props) {
 				animate={{ opacity: 1, y: 0 }}
 				exit={{ opacity: 0, y: -4 }}
 				transition={{ duration: 0.2 }}
+				className="flex w-full items-center justify-center gap-2 text-center text-[0.7rem] font-semibold tracking-[0.24em] text-muted-foreground uppercase"
 			>
-				<Badge
-					variant="outline"
-					className="gap-2 px-3 py-1.5 text-[0.65rem] uppercase tracking-[0.25em]"
-				>
-					<span
-						className={cn(
-							"inline-block size-2 rounded-full",
-							DOT_COLOR[status]
-						)}
-					/>
-					{label}
-				</Badge>
+				<span
+					className={cn("inline-block size-2 rounded-full", DOT_COLOR[status])}
+				/>
+				{label}
 			</motion.div>
 		</AnimatePresence>
 	)

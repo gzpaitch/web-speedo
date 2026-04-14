@@ -74,7 +74,7 @@ export function MetricsCarousel({ metrics }: Props) {
 				</div>
 			</div>
 			{pairs.length > 1 ? (
-				<div className="mt-3 flex items-center justify-center gap-2">
+				<div className="mt-4 flex items-center justify-center gap-2 pb-4">
 					{pairs.map((_, index) => (
 						<button
 							// biome-ignore lint/suspicious/noArrayIndexKey: dot index maps to pair slot
@@ -82,8 +82,10 @@ export function MetricsCarousel({ metrics }: Props) {
 							type="button"
 							onClick={() => emblaApi?.scrollTo(index)}
 							className={cn(
-								"h-2 rounded-full transition-all",
-								selected === index ? "w-6 bg-foreground" : "w-2 bg-border"
+								"h-2.5 rounded-full border border-transparent transition-all",
+								selected === index
+									? "w-7 bg-foreground shadow-[0_0_18px_hsl(var(--foreground)/0.22)]"
+									: "w-2.5 bg-border/80 hover:bg-border"
 							)}
 							aria-label={`Go to metric pair ${index + 1}`}
 							aria-pressed={selected === index}

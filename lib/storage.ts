@@ -11,6 +11,7 @@ import {
 	type AppSettings,
 	DEFAULT_ACTIVE_METRICS,
 	type MetricId,
+	type OrientationMode,
 	type Records,
 	type SessionDraft,
 } from "@/features/speedometer/types"
@@ -22,6 +23,7 @@ import {
 export const DEFAULT_SETTINGS: AppSettings = {
 	units: "metric",
 	language: "en",
+	orientationMode: "portrait",
 	keepScreenOn: false,
 	weightKg: null,
 	speedAlertKmh: 0,
@@ -116,10 +118,16 @@ function sanitizeSettings(raw: unknown): AppSettings {
 	}
 
 	const partial = raw as Partial<AppSettings>
+	const orientationMode: OrientationMode =
+		partial.orientationMode === "landscape" ||
+		partial.orientationMode === "responsive"
+			? partial.orientationMode
+			: "portrait"
 
 	return {
 		units: partial.units === "imperial" ? "imperial" : "metric",
 		language: partial.language === "pt" ? "pt" : "en",
+		orientationMode,
 		keepScreenOn: partial.keepScreenOn === true,
 		weightKg:
 			typeof partial.weightKg === "number" && partial.weightKg > 0

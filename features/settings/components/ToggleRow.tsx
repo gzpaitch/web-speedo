@@ -1,5 +1,7 @@
 "use client"
 
+import type { ReactNode } from "react"
+
 import { Switch } from "@/components/ui/switch"
 import { cn } from "@/lib/utils"
 
@@ -10,6 +12,7 @@ type Props = {
 	onCheckedChange: (value: boolean) => void
 	disabled?: boolean
 	className?: string
+	icon?: ReactNode
 }
 
 export function ToggleRow({
@@ -19,28 +22,44 @@ export function ToggleRow({
 	onCheckedChange,
 	disabled,
 	className,
+	icon,
 }: Props) {
 	return (
 		<div
 			className={cn(
-				"flex min-h-14 items-center justify-between gap-4 px-1 py-2",
+				"group rounded-[1.4rem] border border-transparent px-3 py-3 transition-colors",
+				"hover:border-border/70 hover:bg-muted/35",
+				disabled && "opacity-70",
 				className
 			)}
 		>
-			<div className="flex-1">
-				<p className="text-base text-foreground">{label}</p>
-				{description ? (
-					<p className="text-sm text-muted-foreground opacity-80">
-						{description}
-					</p>
+			<div className="flex w-full items-center gap-3">
+				{icon ? (
+					<div className="flex size-11 shrink-0 items-center justify-center rounded-2xl border border-border/70 bg-background/75 text-muted-foreground shadow-sm">
+						{icon}
+					</div>
 				) : null}
+				<div className="flex-1">
+					<div className="flex min-h-11 items-center">
+						<p className="text-[0.98rem] font-medium tracking-tight text-foreground">
+							{label}
+						</p>
+					</div>
+					{description ? (
+						<p className="mt-1 text-sm leading-5 text-muted-foreground/85">
+							{description}
+						</p>
+					) : null}
+				</div>
+				<div className="rounded-full border border-border/70 bg-background/75 p-1 shadow-sm">
+					<Switch
+						checked={checked}
+						onCheckedChange={onCheckedChange}
+						disabled={disabled}
+						aria-label={label}
+					/>
+				</div>
 			</div>
-			<Switch
-				checked={checked}
-				onCheckedChange={onCheckedChange}
-				disabled={disabled}
-				aria-label={label}
-			/>
 		</div>
 	)
 }

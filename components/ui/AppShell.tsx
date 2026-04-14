@@ -32,7 +32,7 @@ export function AppShell() {
 		align: "start",
 		containScroll: "trimSnaps",
 		dragFree: false,
-		loop: false,
+		loop: true,
 		startIndex: START_INDEX,
 		watchDrag: (_, event) => {
 			const target = event.target

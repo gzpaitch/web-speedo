@@ -14,6 +14,8 @@ export type Language = "en" | "pt"
 
 export type ThemeMode = "system" | "light" | "dark"
 
+export type OrientationMode = "portrait" | "landscape" | "responsive"
+
 /** All available metric ids the user can toggle in the UI. */
 export type MetricId =
 	| "maxSpeed"
@@ -62,6 +64,7 @@ export type SpeedReading = {
 export type AppSettings = {
 	units: Units
 	language: Language
+	orientationMode: OrientationMode
 	keepScreenOn: boolean
 	/** kg. `null` when not configured. */
 	weightKg: number | null
