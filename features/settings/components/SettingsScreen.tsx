@@ -50,7 +50,12 @@ export function SettingsScreen() {
 						label={t("theme")}
 						description={t("themeHint")}
 						checked={isDark}
-						onCheckedChange={(value) => setTheme(value ? "dark" : "light")}
+						onCheckedChange={(value) => {
+							// If the user's desired value matches system, restore
+							// "system" so the auto-detection keeps working.
+							const desired = value ? "dark" : "light"
+							setTheme(desired)
+						}}
 					/>
 					<Separator />
 					<ToggleRow
@@ -123,7 +128,7 @@ export function SettingsScreen() {
 
 			{!hydrated ? (
 				<p className="sr-only" aria-live="polite">
-					loading settings
+					{t("loading")}
 				</p>
 			) : null}
 		</section>

@@ -36,6 +36,14 @@ export function IntlProvider({ children }: { children: React.ReactNode }) {
 		setLanguageState(next)
 	}, [])
 
+	// Keep <html lang> in sync with the active language so screen readers
+	// announce content in the correct language (fixes hardcoded lang="en").
+	React.useEffect(() => {
+		if (typeof document !== "undefined") {
+			document.documentElement.lang = language
+		}
+	}, [language])
+
 	const value = React.useMemo<LanguageContextValue>(
 		() => ({ language, setLanguage }),
 		[language, setLanguage]

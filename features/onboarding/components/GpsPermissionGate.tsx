@@ -34,10 +34,8 @@ export function GpsPermissionGate({ children }: { children: React.ReactNode }) {
 		setIsRequesting(true)
 		try {
 			await refresh()
-			const next = await request()
-			if (next !== "granted") {
-				// leave state as-is; the gate will re-render accordingly
-			}
+			await request()
+			// Gate will re-render based on the new state from useGpsPermission.
 		} finally {
 			setIsRequesting(false)
 		}

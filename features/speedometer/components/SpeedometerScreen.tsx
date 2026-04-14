@@ -79,7 +79,6 @@ export function SpeedometerScreen({ onSessionEnd }: Props) {
 		reading,
 		units: settings.units,
 		weightKg: settings.weightKg,
-		sessionState: session.snapshot.state,
 		activeIds,
 	})
 
@@ -154,7 +153,7 @@ export function SpeedometerScreen({ onSessionEnd }: Props) {
 				"relative flex h-full min-h-dvh w-full flex-col bg-background text-foreground",
 				"px-6 pt-[max(env(safe-area-inset-top),1rem)] pb-[max(env(safe-area-inset-bottom),1rem)]"
 			)}
-			aria-label="Speedometer"
+			aria-label={t("speedometerLabel")}
 		>
 			{/* Full-screen tap target for focus-mode toggling during a run.
 			    Sits below interactive controls in the stacking order. */}
@@ -163,7 +162,7 @@ export function SpeedometerScreen({ onSessionEnd }: Props) {
 					type="button"
 					onClick={onTap}
 					onKeyDown={onTapKey}
-					aria-label="Toggle focus mode"
+					aria-label={t("toggleFocusMode")}
 					className="absolute inset-0 z-0 cursor-default bg-transparent"
 				/>
 			) : null}

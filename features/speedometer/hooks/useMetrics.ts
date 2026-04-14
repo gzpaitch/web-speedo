@@ -7,7 +7,6 @@ import {
 } from "@/features/speedometer/hooks/useSession"
 import type {
 	MetricId,
-	SessionState,
 	SpeedReading,
 	Units,
 } from "@/features/speedometer/types"
@@ -34,7 +33,6 @@ type Options = {
 	reading: SpeedReading | null
 	units: Units
 	weightKg: number | null
-	sessionState: SessionState
 	activeIds: readonly MetricId[]
 }
 
@@ -49,7 +47,6 @@ export function useMetrics({
 	reading,
 	units,
 	weightKg,
-	sessionState: _sessionState,
 	activeIds,
 }: Options): MetricValue[] {
 	const [clockTick, setClockTick] = React.useState(() => Date.now())

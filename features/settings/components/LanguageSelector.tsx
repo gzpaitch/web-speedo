@@ -26,6 +26,7 @@ export function LanguageSelector({ value, onChange }: Props) {
 						variant={value === lang ? "default" : "outline"}
 						onClick={() => onChange(lang)}
 						className={cn("min-h-12 px-4")}
+						aria-pressed={value === lang}
 					>
 						{LANGUAGE_LABELS[lang]}
 					</Button>

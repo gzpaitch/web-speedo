@@ -94,5 +94,8 @@ export function useRecords(): RecordsHook {
 		setRecords(DEFAULT_RECORDS)
 	}, [])
 
-	return { records, applySession, reset, hydrated }
+	return React.useMemo(
+		() => ({ records, applySession, reset, hydrated }),
+		[records, applySession, reset, hydrated]
+	)
 }

@@ -11,7 +11,13 @@ export function estimateCalories(
 	weightKg: number | null | undefined,
 	movementMs: number
 ): number | null {
-	if (!weightKg || weightKg <= 0 || movementMs <= 0) {
+	if (
+		!weightKg ||
+		weightKg <= 0 ||
+		!Number.isFinite(weightKg) ||
+		movementMs <= 0 ||
+		!Number.isFinite(movementMs)
+	) {
 		return null
 	}
 

@@ -35,7 +35,9 @@
 		"recoveryTitle": "Sessão em andamento",
 		"recoveryDescription": "Você tem uma sessão pausada:",
 		"recoveryTime": "Tempo",
-		"recoveryDistance": "Distância"
+		"recoveryDistance": "Distância",
+		"speedometerLabel": "Velocímetro",
+		"toggleFocusMode": "Alternar modo foco"
 	},
 	"metrics": {
 		"maxSpeed": "Máx",
@@ -77,7 +79,8 @@
 		"speedAlertHint": "Vibra e destaca quando você passa desta velocidade. 0 desativa.",
 		"language": "Idioma",
 		"metricsGroup": "Métricas do velocímetro",
-		"metricsGroupHint": "Escolha quais métricas aparecem no carrossel do velocímetro."
+		"metricsGroupHint": "Escolha quais métricas aparecem no carrossel do velocímetro.",
+		"loading": "Carregando ajustes…"
 	},
 	"stats": {
 		"title": "Recordes",

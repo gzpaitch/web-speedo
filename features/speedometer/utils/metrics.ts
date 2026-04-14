@@ -110,7 +110,12 @@ export function formatCoords(
 	lat: number | null,
 	lon: number | null
 ): { value: string; unit: string } {
-	if (lat === null || lon === null) {
+	if (
+		lat === null ||
+		lon === null ||
+		!Number.isFinite(lat) ||
+		!Number.isFinite(lon)
+	) {
 		return { value: "—", unit: "" }
 	}
 	return {

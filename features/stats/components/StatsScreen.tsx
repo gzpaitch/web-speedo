@@ -30,9 +30,14 @@ export function StatsScreen({ onHookReady }: StatsScreenProps) {
 	const recordsHook = useRecords()
 	const { records, reset } = recordsHook
 
+	// Expose the hook API to the shell once — `applySession` and `reset` are
+	// stable callbacks; there's no need to re-call on every records update.
+	const onHookReadyRef = React.useRef(onHookReady)
+	onHookReadyRef.current = onHookReady
 	React.useEffect(() => {
-		onHookReady?.(recordsHook)
-	}, [onHookReady, recordsHook])
+		onHookReadyRef.current?.(recordsHook)
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [recordsHook]) // intentionally empty — fire once on mount
 
 	const cards = buildCards(records, settings.units, tCommon("notAvailable"))
 

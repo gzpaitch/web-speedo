@@ -60,7 +60,11 @@ export function MetricsCarousel({ metrics }: Props) {
 						>
 							<div className="grid grid-cols-2 gap-3">
 								{pair.length === 1 ? (
-									<MetricCard metric={pair[0]} centered />
+									<div className="col-span-2 flex justify-center">
+										<div className="w-1/2">
+											<MetricCard metric={pair[0]} centered />
+										</div>
+									</div>
 								) : (
 									pair.map((m) => <MetricCard key={m.id} metric={m} />)
 								)}

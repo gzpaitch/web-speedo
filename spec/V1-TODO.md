@@ -43,22 +43,22 @@
 - [x] **`ThemeProvider.tsx:47`** — `systemTheme` via `window.matchMedia` no initializer → mismatch SSR/hydration
 - [x] **`NumberInputRow.tsx:59`** — `min`/`max` não são enforçados antes de chamar `onChange`; valores fora de range são salvos
 - [x] **`useMetrics.ts:59`** — `totalTime` usa `Date.now()` mas o interval só roda quando `currentTime` está ativo; métrica fica estagnada quando `currentTime` não está selecionado
-- [ ] **`app/layout.tsx:60`** — `<html lang="en">` hardcoded não reflete o idioma ativo (PT/EN); leitores de tela anunciam em inglês mesmo no PT
-- [ ] **`app/layout.tsx:40-50`** — viewport com `maximumScale: 1` + `userScalable: false` bloqueia zoom (a11y)
-- [ ] **`SpeedometerScreen.tsx:149,164`** — `aria-label="Speedometer"` e `aria-label="Toggle focus mode"` hardcoded em inglês; usar `useTranslations("session")`
-- [ ] **`SettingsScreen.tsx:124-128`** — texto `"loading settings"` hardcoded em inglês (deveria usar `t("loading")`)
-- [ ] **`components/ui/dialog.tsx:41-43`** — variantes Tailwind inválidas `data-open:` / `data-closed:`; deveria ser `data-[state=open]:` / `data-[state=closed]:`
-- [ ] **`metrics.ts:113-118`** — `formatCoords` não checa `Number.isFinite(lat/lon)`; retornaria `"NaN"` para coords inválidas
-- [ ] **`lib/calories.ts:14-19`** — sem guard `Number.isFinite(weightKg)` / `Number.isFinite(movementMs)`; aceita `Infinity`
-- [ ] **`StatsScreen.tsx:33-35`** — `onHookReady?.(recordsHook)` dispara em todo render porque `recordsHook` é novo objeto a cada render
-- [ ] **`useRecords.ts:97`** — retorno `{ records, applySession, reset, hydrated }` não é memoizado → referência instável
-- [ ] **`useSession.ts:257-275`** — `applyReading` lê `snapshotRef.current.state` após `dispatch`, que ainda é stale; calcular next phase síncronamente
-- [ ] **`MetricsCarousel.tsx:61-66`** — card único não centraliza: `grid-cols-2` reserva 2 colunas e `w-1/2` ocupa só 25%; usar `col-span-2`
-- [ ] **`SettingsScreen.tsx:49-54`** — toggle de tema perde a opção `"system"` permanentemente após primeira interação
-- [ ] **`useMetrics.ts:52`** — parâmetro `sessionState` recebido e descartado como `_sessionState` (dead parameter)
-- [ ] **`LanguageSelector.tsx:22-31`** — botões de idioma sem `aria-pressed` (a11y)
-- [ ] **`GpsPermissionGate.tsx:38-40`** — bloco `if (next !== "granted") { /* comment */ }` é dead code
-- [ ] **`MetricsEditMode.tsx:99-103`** — `onCheckedChange` no `Switch` com `pointer-events-none` nunca dispara (callback morto)
+- [x] **`app/layout.tsx:60`** — `<html lang="en">` hardcoded não reflete o idioma ativo (PT/EN); leitores de tela anunciam em inglês mesmo no PT
+- [ ] **`app/layout.tsx:40-50`** — viewport com `maximumScale: 1` + `userScalable: false` bloqueia zoom (a11y) — **intencional para PWA de ciclismo (PRD §2)**
+- [x] **`SpeedometerScreen.tsx:149,164`** — `aria-label="Speedometer"` e `aria-label="Toggle focus mode"` hardcoded em inglês; usar `useTranslations("session")`
+- [x] **`SettingsScreen.tsx:124-128`** — texto `"loading settings"` hardcoded em inglês (deveria usar `t("loading")`)
+- [ ] **`components/ui/dialog.tsx:41-43`** — variantes Tailwind inválidas `data-open:` / `data-closed:`; deveria ser `data-[state=open]:` / `data-[state=closed]:` — **requer verificação; shadcn pode usar atributos custom**
+- [x] **`metrics.ts:113-118`** — `formatCoords` não checa `Number.isFinite(lat/lon)`; retornaria `"NaN"` para coords inválidas
+- [x] **`lib/calories.ts:14-19`** — sem guard `Number.isFinite(weightKg)` / `Number.isFinite(movementMs)`; aceita `Infinity`
+- [x] **`StatsScreen.tsx:33-35`** — `onHookReady?.(recordsHook)` dispara em todo render porque `recordsHook` é novo objeto a cada render
+- [x] **`useRecords.ts:97`** — retorno `{ records, applySession, reset, hydrated }` não é memoizado → referência instável
+- [ ] **`useSession.ts:257-275`** — `applyReading` lê `snapshotRef.current.state` após `dispatch`, que ainda é stale; calcular next phase sincronamente — **não é bug: snapshotRef lido é pré-dispatch (correto para decidir timer)**
+- [x] **`MetricsCarousel.tsx:61-66`** — card único não centraliza: `grid-cols-2` reserva 2 colunas e `w-1/2` ocupa só 25%; usar `col-span-2`
+- [x] **`SettingsScreen.tsx:49-54`** — toggle de tema perde a opção `"system"` permanentemente após primeira interação
+- [x] **`useMetrics.ts:52`** — parâmetro `sessionState` recebido e descartado como `_sessionState` (dead parameter)
+- [x] **`LanguageSelector.tsx:22-31`** — botões de idioma sem `aria-pressed` (a11y)
+- [x] **`GpsPermissionGate.tsx:38-40`** — bloco `if (next !== "granted") { /* comment */ }` é dead code
+- [ ] **`MetricsEditMode.tsx:99-103`** — `onCheckedChange` no `Switch` com `pointer-events-none` nunca dispara (callback morto) — **mantido: React requer handler em controlled component**
 
 ---
 

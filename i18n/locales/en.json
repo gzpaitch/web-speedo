@@ -35,7 +35,9 @@
 		"recoveryTitle": "Session in progress",
 		"recoveryDescription": "You have a paused session:",
 		"recoveryTime": "Time",
-		"recoveryDistance": "Distance"
+		"recoveryDistance": "Distance",
+		"speedometerLabel": "Speedometer",
+		"toggleFocusMode": "Toggle focus mode"
 	},
 	"metrics": {
 		"maxSpeed": "Max",
@@ -77,7 +79,8 @@
 		"speedAlertHint": "Vibrates and flashes when you go above this speed. 0 disables.",
 		"language": "Language",
 		"metricsGroup": "Speedometer metrics",
-		"metricsGroupHint": "Pick the metrics shown on the speedometer carousel."
+		"metricsGroupHint": "Pick the metrics shown on the speedometer carousel.",
+		"loading": "Loading settings…"
 	},
 	"stats": {
 		"title": "Records",
