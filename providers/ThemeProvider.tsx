@@ -22,7 +22,7 @@ type ThemeContextValue = {
 
 const ThemeContext = React.createContext<ThemeContextValue | null>(null)
 
-function getSystemTheme(): ResolvedTheme {
+function _getSystemTheme(): ResolvedTheme {
 	if (typeof window === "undefined") {
 		return "dark"
 	}

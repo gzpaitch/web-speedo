@@ -75,10 +75,21 @@ export function SessionRecoveryModal({
 				</div>
 
 				<DialogFooter>
-					<Button type="button" size="lg" className="min-h-12 rounded-full px-6" variant="outline" onClick={onDiscard}>
+					<Button
+						type="button"
+						size="lg"
+						className="min-h-12 rounded-full px-6"
+						variant="outline"
+						onClick={onDiscard}
+					>
 						{tCommon("discard")}
 					</Button>
-					<Button type="button" size="lg" className="min-h-12 rounded-full px-6" onClick={onResume}>
+					<Button
+						type="button"
+						size="lg"
+						className="min-h-12 rounded-full px-6"
+						onClick={onResume}
+					>
 						{tCommon("resume")}
 					</Button>
 				</DialogFooter>

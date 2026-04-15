@@ -15,7 +15,6 @@ import {
 	DialogTitle,
 } from "@/components/ui/dialog"
 import type { SessionState } from "@/features/speedometer/types"
-import { cn } from "@/lib/utils"
 
 type Props = {
 	sessionState: SessionState
@@ -37,51 +36,54 @@ export function SessionControls({
 	const [confirmOpen, setConfirmOpen] = React.useState(false)
 
 	const isIdle = sessionState === "IDLE"
+	const isRunning = sessionState === "RUNNING"
 	const isPaused =
 		sessionState === "MANUALLY_PAUSED" || sessionState === "AUTO_PAUSED"
-	const pauseButtonLabel = isPaused ? t("resume") : t("pause")
 
 	return (
-		<div className="grid grid-cols-2 gap-3 rounded-[1.8rem] border border-border/70 bg-card/70 p-3 shadow-[0_18px_45px_-30px_hsl(var(--foreground)/0.3)] backdrop-blur">
-			<Button
-				type="button"
-				size="lg"
-				variant={isIdle || isPaused ? "default" : "outline"}
-				onClick={isIdle ? onStart : isPaused ? onResume : onPause}
-				aria-pressed={isPaused}
-				data-state={isIdle ? "idle" : isPaused ? "paused" : "running"}
-				className={cn(
-					"min-h-16 rounded-[1.3rem] text-base shadow-sm",
-					isIdle || isPaused
-						? "shadow-[0_10px_30px_-18px_hsl(var(--primary)/0.9)]"
-						: "border-border/70 bg-background/80"
-				)}
-			>
-				{isIdle ? (
-					<>
-						<Timer className="size-5" /> {t("start")}
-					</>
-				) : isPaused ? (
-					<>
-						<Play className="size-5" /> {pauseButtonLabel}
-					</>
-				) : (
-					<>
-						<Pause className="size-5" /> {pauseButtonLabel}
-					</>
-				)}
-			</Button>
-			<Button
-				type="button"
-				size="lg"
-				variant="destructive"
-				disabled={isIdle}
-				onClick={() => setConfirmOpen(true)}
-				data-state={isIdle ? "idle" : "active"}
-				className="min-h-16 rounded-[1.3rem] text-base shadow-sm"
-			>
-				<Square className="size-5" /> {t("end")}
-			</Button>
+		<div className="rounded-[1.8rem] border border-border/70 bg-card/70 p-3 shadow-[0_18px_45px_-30px_hsl(var(--foreground)/0.3)] backdrop-blur">
+			{isPaused ? (
+				<div className="grid grid-cols-2 gap-3">
+					<Button
+						type="button"
+						size="lg"
+						variant="default"
+						onClick={onResume}
+						className="min-h-16 rounded-[1.3rem] text-base shadow-[0_10px_30px_-18px_hsl(var(--primary)/0.9)]"
+					>
+						<Play className="size-5" /> {t("resume")}
+					</Button>
+					<Button
+						type="button"
+						size="lg"
+						variant="destructive"
+						onClick={() => setConfirmOpen(true)}
+						className="min-h-16 rounded-[1.3rem] text-base shadow-sm"
+					>
+						<Square className="size-5" /> {t("end")}
+					</Button>
+				</div>
+			) : isIdle ? (
+				<Button
+					type="button"
+					size="lg"
+					variant="default"
+					onClick={onStart}
+					className="min-h-16 w-full rounded-[1.3rem] text-base shadow-[0_10px_30px_-18px_hsl(var(--primary)/0.9)]"
+				>
+					<Timer className="size-5" /> {t("start")}
+				</Button>
+			) : isRunning ? (
+				<Button
+					type="button"
+					size="lg"
+					variant="outline"
+					onClick={onPause}
+					className="min-h-16 w-full rounded-[1.3rem] text-base border-border/70 bg-background/80 shadow-sm"
+				>
+					<Pause className="size-5" /> {t("pause")}
+				</Button>
+			) : null}
 			<Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
 				<DialogContent>
 					<DialogHeader>

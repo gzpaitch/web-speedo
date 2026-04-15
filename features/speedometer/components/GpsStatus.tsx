@@ -31,7 +31,11 @@ export function GpsStatus({ status }: Props) {
 				className="flex w-full items-center justify-center gap-2 text-center text-[0.7rem] font-semibold tracking-[0.24em] text-muted-foreground uppercase"
 			>
 				<span
-					className={cn("inline-block size-2 rounded-full", DOT_COLOR[status])}
+					className={cn(
+						"inline-block size-2 rounded-full",
+						DOT_COLOR[status],
+						"animate-pulse"
+					)}
 				/>
 				{label}
 			</motion.div>

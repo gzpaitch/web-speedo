@@ -25,6 +25,7 @@ export const STORAGE_KEYS = {
 	records: "speedo:records",
 	sessionDraft: "speedo:session_draft",
 	gpsGranted: "speedo:gps_granted",
+	installOnboardingSeen: "speedo:install_onboarding_seen",
 } as const
 
 /** GPS accuracy thresholds (meters). */

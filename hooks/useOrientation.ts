@@ -4,7 +4,7 @@ import * as React from "react"
 
 export type Orientation = "portrait" | "landscape"
 
-function getOrientation(): Orientation {
+function _getOrientation(): Orientation {
 	if (typeof window === "undefined") {
 		return "portrait"
 	}

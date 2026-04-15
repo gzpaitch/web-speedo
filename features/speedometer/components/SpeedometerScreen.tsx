@@ -1,6 +1,6 @@
 "use client"
 
-import { Moon, Sun } from "lucide-react"
+import { Maximize2, Minimize2, Moon, Sun } from "lucide-react"
 import { useTranslations } from "next-intl"
 import * as React from "react"
 
@@ -240,6 +240,21 @@ export function SpeedometerScreen({
 									<Moon className="size-5" />
 								)}
 							</Button>
+							<Button
+								type="button"
+								variant="outline"
+								size="icon"
+								className="size-11 rounded-full border-border/70 bg-background/80 text-muted-foreground shadow-sm backdrop-blur hover:text-foreground"
+								onClick={focus.toggle}
+								aria-label={t("toggleFocusMode")}
+								title={t("toggleFocusMode")}
+							>
+								{focus.isFocused ? (
+									<Minimize2 className="size-5" />
+								) : (
+									<Maximize2 className="size-5" />
+								)}
+							</Button>
 						</div>
 					) : null}
 				</div>
@@ -291,6 +306,21 @@ export function SpeedometerScreen({
 									<Sun className="size-5" />
 								) : (
 									<Moon className="size-5" />
+								)}
+							</Button>
+							<Button
+								type="button"
+								variant="outline"
+								size="icon"
+								className="size-11 rounded-full border-border/70 bg-background/80 text-muted-foreground shadow-sm backdrop-blur hover:text-foreground"
+								onClick={focus.toggle}
+								aria-label={t("toggleFocusMode")}
+								title={t("toggleFocusMode")}
+							>
+								{focus.isFocused ? (
+									<Minimize2 className="size-5" />
+								) : (
+									<Maximize2 className="size-5" />
 								)}
 							</Button>
 						</div>

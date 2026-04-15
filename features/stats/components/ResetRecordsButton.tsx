@@ -46,7 +46,12 @@ export function ResetRecordsButton({ onReset }: Props) {
 					</DialogHeader>
 					<DialogFooter>
 						<DialogClose asChild>
-							<Button type="button" size="lg" className="min-h-12 rounded-full px-6" variant="outline">
+							<Button
+								type="button"
+								size="lg"
+								className="min-h-12 rounded-full px-6"
+								variant="outline"
+							>
 								{tCommon("cancel")}
 							</Button>
 						</DialogClose>

@@ -1,6 +1,7 @@
 "use client"
 
 import type { ReactNode } from "react"
+import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
@@ -26,10 +27,40 @@ export function NumberInputRow({
 	placeholder,
 	min,
 	max,
-	step,
 	className,
 	icon,
 }: Props) {
+	const [draftValue, setDraftValue] = React.useState(
+		value === null ? "" : String(value)
+	)
+
+	React.useEffect(() => {
+		setDraftValue(value === null ? "" : String(value))
+	}, [value])
+
+	const commitValue = React.useCallback(
+		(rawValue: string) => {
+			if (rawValue === "") {
+				onChange(null)
+				return
+			}
+
+			const parsed = Number(rawValue)
+			if (!Number.isFinite(parsed)) {
+				setDraftValue(value === null ? "" : String(value))
+				return
+			}
+
+			let normalized = parsed
+			if (min !== undefined && normalized < min) normalized = min
+			if (max !== undefined && normalized > max) normalized = max
+
+			setDraftValue(String(normalized))
+			onChange(normalized)
+		},
+		[max, min, onChange, value]
+	)
+
 	return (
 		<label
 			className={cn(
@@ -56,27 +87,29 @@ export function NumberInputRow({
 					) : null}
 				</span>
 				<input
-					type="number"
+					type="text"
 					inputMode="numeric"
-					min={min}
-					max={max}
-					step={step}
+					pattern="[0-9]*"
 					placeholder={placeholder}
-					value={value ?? ""}
+					value={draftValue}
 					onChange={(event) => {
 						const raw = event.target.value
-						if (raw === "") {
-							onChange(null)
+
+						if (raw === "" || /^\d+$/.test(raw)) {
+							setDraftValue(raw)
+						}
+					}}
+					onBlur={() => commitValue(draftValue)}
+					onKeyDown={(event) => {
+						if (event.key === "Enter") {
+							commitValue(draftValue)
+							event.currentTarget.blur()
 							return
 						}
-						const parsed = Number(raw)
-						if (Number.isFinite(parsed)) {
-							// Enforce min/max before propagating — HTML attributes are
-							// only advisory and don't block out-of-range typed values.
-							let clamped = parsed
-							if (min !== undefined && clamped < min) clamped = min
-							if (max !== undefined && clamped > max) clamped = max
-							onChange(clamped)
+
+						if (event.key === "Escape") {
+							setDraftValue(value === null ? "" : String(value))
+							event.currentTarget.blur()
 						}
 					}}
 					className={cn(

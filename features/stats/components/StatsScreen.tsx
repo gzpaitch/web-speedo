@@ -44,40 +44,53 @@ export function StatsScreen({ onHookReady }: StatsScreenProps) {
 	return (
 		<section
 			className={cn(
-				"relative h-full min-h-dvh w-full overflow-y-auto bg-background px-6 text-foreground",
-				"pt-[max(env(safe-area-inset-top),1.5rem)] pb-[max(env(safe-area-inset-bottom),1.5rem)]"
+				"relative h-full min-h-dvh w-full overflow-y-auto bg-background px-5 text-foreground sm:px-6 lg:px-10 xl:px-12",
+				"pt-[max(env(safe-area-inset-top),2.25rem)] pb-[max(env(safe-area-inset-bottom),1.75rem)] sm:pt-[max(env(safe-area-inset-top),2.75rem)] sm:pb-[max(env(safe-area-inset-bottom),2.25rem)]"
 			)}
 			aria-labelledby="stats-title"
 		>
 			<div className="pointer-events-none absolute inset-x-0 top-0 h-64 bg-[radial-gradient(circle_at_top,hsl(var(--primary)/0.14),transparent_58%)] opacity-90" />
 			<div className="pointer-events-none absolute left-0 bottom-12 size-48 rounded-full bg-[hsl(var(--primary)/0.07)] blur-3xl" />
 
-			<header className="relative mb-6">
-				<h1
-					id="stats-title"
-					className="text-3xl font-semibold tracking-[-0.03em]"
-				>
-					{t("title")}
-				</h1>
-				<div className="mt-3 h-1 w-20 rounded-full bg-[linear-gradient(90deg,hsl(var(--primary)),hsl(var(--primary)/0.2))]" />
-			</header>
+			<div className="relative mx-auto flex min-h-full w-full max-w-6xl flex-col">
+				<header className="mb-6 sm:mb-7 lg:mb-9">
+					<div className="max-w-3xl">
+						<h1
+							id="stats-title"
+							className="text-[2.1rem] font-semibold tracking-[-0.03em] sm:text-3xl lg:text-[3.25rem]"
+						>
+							{t("title")}
+						</h1>
+						<div className="mt-3 h-1 w-20 rounded-full bg-[linear-gradient(90deg,hsl(var(--primary)),hsl(var(--primary)/0.2))] lg:mt-4 lg:w-24" />
+					</div>
+				</header>
 
-			<div className="relative rounded-[2rem] border border-border/70 bg-card/70 p-4 shadow-[0_20px_60px_-32px_hsl(var(--foreground)/0.45)] backdrop-blur">
-				<div className="flex flex-col gap-3 landscape:grid landscape:grid-cols-2">
-					{cards.map((card) => (
-						<RecordCard
-							key={card.key}
-							label={t(card.labelKey)}
-							value={card.value}
-							unit={card.unit}
-							icon={card.icon}
-						/>
-					))}
+				<div className="rounded-[2rem] border border-border/70 bg-card/70 p-4 shadow-[0_20px_60px_-32px_hsl(var(--foreground)/0.45)] backdrop-blur sm:p-5 lg:rounded-[2.25rem] lg:p-6">
+					<div className="grid gap-4 sm:gap-5 md:grid-cols-2">
+						{cards.map((card, index) => (
+							<RecordCard
+								key={card.key}
+								label={t(card.labelKey)}
+								value={card.value}
+								unit={card.unit}
+								icon={card.icon}
+								className={cn(index === cards.length - 1 && "md:col-span-2")}
+								valueClassName={cn(
+									card.key === "lastRecord" &&
+										"text-[1.4rem] sm:text-[1.6rem] lg:text-[1.8rem]"
+								)}
+							/>
+						))}
+					</div>
 				</div>
-			</div>
 
-			<div className="relative mt-5 mb-8 rounded-[1.6rem] border border-border/70 bg-card/65 p-3 shadow-[0_18px_45px_-30px_hsl(var(--foreground)/0.3)] backdrop-blur">
-				<ResetRecordsButton onReset={reset} />
+				<div className="mt-5 mb-7 rounded-[1.6rem] border border-border/70 bg-card/65 p-3 shadow-[0_18px_45px_-30px_hsl(var(--foreground)/0.3)] backdrop-blur sm:mt-6 sm:mb-8 sm:p-3.5 lg:mt-7">
+					<div className="sm:flex sm:justify-end">
+						<div className="sm:w-full sm:max-w-sm">
+							<ResetRecordsButton onReset={reset} />
+						</div>
+					</div>
+				</div>
 			</div>
 		</section>
 	)

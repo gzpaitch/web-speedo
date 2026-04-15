@@ -2,10 +2,16 @@
 
 import * as React from "react"
 
+import { usePWAInstall } from "@/app/MVP/usePWAInstall"
 import { useGpsPermission } from "@/features/onboarding/hooks/useGpsPermission"
+import {
+	getInstallOnboardingSeenFlag,
+	setInstallOnboardingSeenFlag,
+} from "@/lib/storage"
 
 import { GpsDeniedScreen } from "./GpsDeniedScreen"
 import { GpsPermissionScreen } from "./GpsPermissionScreen"
+import { InstallPromptScreen } from "./InstallPromptScreen"
 
 /**
  * Blocks children until GPS permission is granted.
@@ -19,7 +25,12 @@ import { GpsPermissionScreen } from "./GpsPermissionScreen"
  */
 export function GpsPermissionGate({ children }: { children: React.ReactNode }) {
 	const { state, request, refresh } = useGpsPermission()
+	const pwa = usePWAInstall()
 	const [isRequesting, setIsRequesting] = React.useState(false)
+	const [isInstalling, setIsInstalling] = React.useState(false)
+	const [installOnboardingSeen, setInstallOnboardingSeen] = React.useState(
+		getInstallOnboardingSeenFlag
+	)
 
 	const handleRequest = React.useCallback(async () => {
 		setIsRequesting(true)
@@ -41,7 +52,56 @@ export function GpsPermissionGate({ children }: { children: React.ReactNode }) {
 		}
 	}, [refresh, request])
 
+	const finishInstallOnboarding = React.useCallback(() => {
+		setInstallOnboardingSeenFlag(true)
+		setInstallOnboardingSeen(true)
+	}, [])
+
+	const handleInstall = React.useCallback(async () => {
+		setIsInstalling(true)
+		try {
+			const result = await pwa.install()
+			if (result === "accepted") {
+				finishInstallOnboarding()
+			}
+		} finally {
+			setIsInstalling(false)
+		}
+	}, [finishInstallOnboarding, pwa])
+
+	React.useEffect(() => {
+		if (state !== "granted" || installOnboardingSeen || !pwa.ready) {
+			return
+		}
+
+		if (pwa.state === "installed") {
+			finishInstallOnboarding()
+		}
+	}, [
+		finishInstallOnboarding,
+		installOnboardingSeen,
+		pwa.ready,
+		pwa.state,
+		state,
+	])
+
 	if (state === "granted") {
+		if (!installOnboardingSeen) {
+			if (!pwa.ready) {
+				return null
+			}
+
+			return (
+				<InstallPromptScreen
+					canInstall={pwa.state === "available"}
+					isIOS={pwa.isIOS}
+					isInstalling={isInstalling}
+					onInstall={() => void handleInstall()}
+					onContinue={finishInstallOnboarding}
+				/>
+			)
+		}
+
 		return <>{children}</>
 	}
 

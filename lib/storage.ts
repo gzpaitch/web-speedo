@@ -264,3 +264,31 @@ export function setGpsGrantedFlag(granted: boolean): void {
 		localStorage.removeItem(STORAGE_KEYS.gpsGranted)
 	}
 }
+
+/* -------------------------------------------------------------------------- */
+/* Install onboarding flag                                                    */
+/* -------------------------------------------------------------------------- */
+
+export function getInstallOnboardingSeenFlag(): boolean {
+	if (!isBrowser()) {
+		return false
+	}
+
+	try {
+		return localStorage.getItem(STORAGE_KEYS.installOnboardingSeen) === "1"
+	} catch {
+		return false
+	}
+}
+
+export function setInstallOnboardingSeenFlag(seen: boolean): void {
+	if (!isBrowser()) {
+		return
+	}
+
+	if (seen) {
+		localStorage.setItem(STORAGE_KEYS.installOnboardingSeen, "1")
+	} else {
+		localStorage.removeItem(STORAGE_KEYS.installOnboardingSeen)
+	}
+}

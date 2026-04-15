@@ -4,7 +4,7 @@ import { Languages } from "lucide-react"
 import { useTranslations } from "next-intl"
 import type { ReactNode } from "react"
 
-import { Button } from "@/components/ui/button"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import type { Language, OrientationMode } from "@/features/speedometer/types"
 import { LANGUAGE_LABELS, SUPPORTED_LANGUAGES } from "@/i18n/config"
 import { cn } from "@/lib/utils"
@@ -24,6 +24,13 @@ function SegmentedSelector<T extends string>({
 	options,
 	icon,
 }: SegmentedSelectorProps<T>) {
+	const columnsClass =
+		options.length === 2
+			? "grid-cols-2"
+			: options.length === 3
+				? "grid-cols-3"
+				: "grid-cols-1"
+
 	return (
 		<div className="flex flex-col gap-4 rounded-2xl px-2 py-4 transition-colors hover:bg-muted/35">
 			<div className="flex w-full items-center gap-3">
@@ -36,28 +43,36 @@ function SegmentedSelector<T extends string>({
 					{label}
 				</p>
 			</div>
-			<div className="flex w-full flex-col gap-3 sm:flex-row sm:flex-wrap">
-				{options.map((option) => (
-					<Button
-						key={option.value}
-						type="button"
-						size="lg"
-						variant={value === option.value ? "default" : "outline"}
-						onClick={() => onChange(option.value)}
-						className={cn(
-							"min-h-14 flex-1 rounded-full px-6 text-base font-medium tracking-tight sm:flex-none",
-						)}
-						aria-pressed={value === option.value}
-					>
-						{option.icon ? (
-							<span className="mr-2 flex shrink-0 items-center justify-center">
-								{option.icon}
-							</span>
-						) : null}
-						{option.label}
-					</Button>
-				))}
-			</div>
+			<Tabs
+				value={value}
+				onValueChange={(next) => onChange(next as T)}
+				className="w-full"
+			>
+				<TabsList
+					className={cn(
+						"grid h-auto w-full gap-2 rounded-[1.5rem] bg-muted/55 p-1.5",
+						columnsClass
+					)}
+				>
+					{options.map((option) => (
+						<TabsTrigger
+							key={option.value}
+							value={option.value}
+							className={cn(
+								"min-h-13 h-auto w-full rounded-[1.15rem] px-3 py-3 text-center text-sm font-medium tracking-tight whitespace-normal text-foreground/70 data-[state=active]:bg-background data-[state=active]:text-foreground dark:data-[state=active]:bg-background/80",
+								options.length > 2 && "text-[0.92rem]"
+							)}
+						>
+							{option.icon ? (
+								<span className="flex shrink-0 items-center justify-center">
+									{option.icon}
+								</span>
+							) : null}
+							{option.label}
+						</TabsTrigger>
+					))}
+				</TabsList>
+			</Tabs>
 		</div>
 	)
 }
@@ -87,7 +102,11 @@ type OrientationSelectorProps = {
 	value: OrientationMode
 	onChange: (mode: OrientationMode) => void
 	label: string
-	options: readonly { value: OrientationMode; label: string; icon?: ReactNode }[]
+	options: readonly {
+		value: OrientationMode
+		label: string
+		icon?: ReactNode
+	}[]
 	icon?: ReactNode
 }
 

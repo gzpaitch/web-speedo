@@ -8,9 +8,10 @@ import { cn } from "@/lib/utils"
 type Props = {
 	metric: MetricValue
 	centered?: boolean
+	borderless?: boolean
 }
 
-export function MetricCard({ metric, centered = false }: Props) {
+export function MetricCard({ metric, centered = false, borderless = false }: Props) {
 	const t = useTranslations("metrics")
 	const isCoords = metric.id === "coords"
 	const isTime = metric.id.includes("Time")
@@ -24,11 +25,14 @@ export function MetricCard({ metric, centered = false }: Props) {
 	return (
 		<div
 			className={cn(
-				"relative flex h-24 flex-col items-center justify-center overflow-hidden rounded-[1.5rem] border border-border/70 bg-card/75 px-4 shadow-[0_18px_45px_-30px_hsl(var(--foreground)/0.35)] backdrop-blur landscape:h-full landscape:min-h-0 landscape:rounded-[1.35rem] landscape:px-3",
+				"relative flex h-24 flex-col items-center justify-center overflow-hidden rounded-[1.5rem] px-4 landscape:h-full landscape:min-h-0 landscape:rounded-[1.35rem] landscape:px-3",
+				borderless
+					? "bg-transparent"
+					: "border border-border/70 bg-card/75 shadow-[0_18px_45px_-30px_hsl(var(--foreground)/0.35)] backdrop-blur",
 				centered && "mx-auto w-1/2"
 			)}
 		>
-			<div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-[linear-gradient(90deg,transparent,hsl(var(--border)),transparent)]" />
+			{!borderless && <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-[linear-gradient(90deg,transparent,hsl(var(--border)),transparent)]" />}
 			<p className="text-[0.62rem] font-semibold uppercase tracking-[0.24em] text-muted-foreground">
 				{t(metric.id)}
 			</p>
