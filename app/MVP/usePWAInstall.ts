@@ -12,11 +12,13 @@ interface NavigatorWithStandalone extends Navigator {
 }
 
 export type PWAInstallState = "idle" | "available" | "installed" | "dismissed"
+export type PWAInstallResult = "accepted" | "dismissed" | "unavailable"
 
 export function usePWAInstall() {
 	const [state, setState] = useState<PWAInstallState>("idle")
 	const [prompt, setPrompt] = useState<BeforeInstallPromptEvent | null>(null)
 	const [isIOS, setIsIOS] = useState(false)
+	const [ready, setReady] = useState(false)
 
 	useEffect(() => {
 		const standalone =
@@ -24,6 +26,7 @@ export function usePWAInstall() {
 			(navigator as NavigatorWithStandalone).standalone === true
 		if (standalone) {
 			setState("installed")
+			setReady(true)
 			return
 		}
 
@@ -31,6 +34,7 @@ export function usePWAInstall() {
 		setIsIOS(ios)
 		if (ios) {
 			setState("available")
+			setReady(true)
 			return
 		}
 
@@ -44,6 +48,7 @@ export function usePWAInstall() {
 
 		window.addEventListener("beforeinstallprompt", handler)
 		window.addEventListener("appinstalled", appInstalledHandler)
+		setReady(true)
 
 		return () => {
 			window.removeEventListener("beforeinstallprompt", handler)
@@ -51,13 +56,17 @@ export function usePWAInstall() {
 		}
 	}, [])
 
-	const install = async () => {
-		if (!prompt) return
+	const install = async (): Promise<PWAInstallResult> => {
+		if (!prompt) {
+			return "unavailable"
+		}
+
 		await prompt.prompt()
 		const { outcome } = await prompt.userChoice
 		setPrompt(null)
 		setState(outcome === "accepted" ? "installed" : "dismissed")
+		return outcome
 	}
 
-	return { state, install, isIOS }
+	return { state, install, isIOS, ready }
 }

@@ -1,9 +1,9 @@
 import type { Metadata, Viewport } from "next"
-import { Geist_Mono, Inter } from "next/font/google"
+import { Bebas_Neue, Geist_Mono, Inter } from "next/font/google"
 
 import "./globals.css"
-import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
+import { AppProviders } from "@/providers/AppProviders"
 import { OrientationLock } from "./orientation-lock"
 import { ServiceWorkerRegister } from "./sw-register"
 
@@ -12,6 +12,12 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
 const fontMono = Geist_Mono({
 	subsets: ["latin"],
 	variable: "--font-mono",
+})
+
+const bebasNeue = Bebas_Neue({
+	subsets: ["latin"],
+	weight: "400",
+	variable: "--font-display",
 })
 
 export const metadata: Metadata = {
@@ -34,10 +40,10 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
 	themeColor: [
-		{ media: "(prefers-color-scheme: dark)", color: "#00b8db" },
-		{ media: "(prefers-color-scheme: light)", color: "#00b8db" },
+		{ media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
+		{ media: "(prefers-color-scheme: light)", color: "#ffffff" },
 	],
-	colorScheme: "dark",
+	colorScheme: "dark light",
 	width: "device-width",
 	initialScale: 1,
 	maximumScale: 1,
@@ -55,15 +61,16 @@ export default function RootLayout({
 			lang="en"
 			suppressHydrationWarning
 			className={cn(
-				"bg-[#00b8db] antialiased",
+				"antialiased",
 				fontMono.variable,
+				bebasNeue.variable,
 				"font-sans",
 				inter.variable
 			)}
 		>
-			<body className="min-h-dvh bg-[#00b8db]">
+			<body className="min-h-dvh bg-background text-foreground">
+				<AppProviders>{children}</AppProviders>
 				<OrientationLock />
-				<ThemeProvider>{children}</ThemeProvider>
 				<ServiceWorkerRegister />
 			</body>
 		</html>
