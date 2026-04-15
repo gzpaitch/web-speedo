@@ -41,10 +41,8 @@ export function DigitalDisplay({
 	}, [value, spring])
 
 	const display = useTransform(spring, (latest) => {
-		if (latest < 10) {
-			return latest.toFixed(1)
-		}
-		return Math.round(latest).toString()
+		const rounded = Math.max(0, Math.round(latest))
+		return rounded.toString().padStart(2, "0")
 	})
 
 	return (
@@ -71,7 +69,7 @@ export function DigitalDisplay({
 					<motion.span>{display}</motion.span>
 				</motion.span>
 			</AnimatePresence>
-			<span className="-mt-3 text-[1.35rem] uppercase tracking-[0.34em] text-muted-foreground/80">
+			<span className="mt-1 text-[1.35rem] uppercase tracking-[0.34em] text-muted-foreground/80">
 				{unit}
 			</span>
 		</div>

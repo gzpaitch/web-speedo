@@ -25,16 +25,16 @@ function chunkMetrics(
 }
 
 export function MetricsCarousel({ metrics, className }: Props) {
-	const borderless = metrics.length === 1
 	const [isLandscape, setIsLandscape] = React.useState(false)
 	const itemsPerPage = isLandscape ? 4 : 2
 	const pages = React.useMemo(
 		() => chunkMetrics(metrics, itemsPerPage),
 		[metrics, itemsPerPage]
 	)
+	const canLoop = pages.length > 1
 	const [emblaRef, emblaApi] = useEmblaCarousel({
 		align: "start",
-		loop: false,
+		loop: canLoop,
 		dragFree: false,
 		containScroll: "trimSnaps",
 	})
@@ -103,7 +103,7 @@ export function MetricsCarousel({ metrics, className }: Props) {
 								{page.length === 1 ? (
 									<div className="col-span-2 flex h-full items-center justify-center">
 										<div className="w-full">
-											<MetricCard metric={page[0]} centered borderless={borderless} />
+											<MetricCard metric={page[0]} centered borderless />
 										</div>
 									</div>
 								) : page.length === 3 ? (
@@ -113,7 +113,7 @@ export function MetricsCarousel({ metrics, className }: Props) {
 										))}
 										<div className="col-span-2 flex justify-center">
 											<div className="w-1/2">
-												<MetricCard metric={page[2]} centered />
+												<MetricCard metric={page[2]} centered borderless />
 											</div>
 										</div>
 									</>

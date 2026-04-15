@@ -41,7 +41,7 @@ export function SpeedometerScreen({
 	const t = useTranslations("session")
 	const tCommon = useTranslations("common")
 	const { settings } = useSettings()
-	const { activeIds, toggle } = useActiveMetrics()
+	const { activeIds, toggle, set: setMetricOrder } = useActiveMetrics()
 	const { reading, status, isWatching, start } = useGeolocation()
 	const { resolvedTheme, setTheme } = useTheme()
 	const isDark = resolvedTheme === "dark"
@@ -224,7 +224,7 @@ export function SpeedometerScreen({
 					</div>
 					{!focus.isFocused ? (
 						<div className="flex items-center justify-center gap-3">
-							<MetricsEditMode activeIds={activeIds} onToggle={toggle} />
+							<MetricsEditMode activeIds={activeIds} onToggle={toggle} onReorder={setMetricOrder} />
 							<Button
 								type="button"
 								variant="outline"
@@ -292,7 +292,7 @@ export function SpeedometerScreen({
 					</div>
 					{!focus.isFocused ? (
 						<div className="flex items-center justify-center gap-3 pt-1">
-							<MetricsEditMode activeIds={activeIds} onToggle={toggle} />
+							<MetricsEditMode activeIds={activeIds} onToggle={toggle} onReorder={setMetricOrder} />
 							<Button
 								type="button"
 								variant="outline"
