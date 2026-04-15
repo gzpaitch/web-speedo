@@ -1,601 +1,453 @@
-# PRD — Speedo
+# PRD — Speedo PWA
 
-**Version:** 1.0  
-**Status:** Ready for Development  
-**Stack:** Next.js + PWA  
+**Version:** 1.0
+**Status:** Ready for Development
+**Stack:** Next.js + PWA
 **Platform:** Android (Chrome Mobile)
 
 ---
 
-## 1. Overview
+## 1. Executive Summary
 
-**Speedo** é uma Progressive Web App (PWA) construída com Next.js que transforma o smartphone do ciclista em um ciclocomputador digital. O app utiliza a Geolocation API do browser para capturar dados de velocidade em tempo real, exibindo métricas da sessão e mantendo um registro de recordes históricos — tudo armazenado localmente no dispositivo, sem necessidade de conta ou backend.
+### Problem Statement
 
-### Problema
-Ciclocomputadores dedicados custam caro. Apps nativos exigem download e permissões extensas. O ciclista casual precisa de uma solução leve, instalável e que funcione offline, acessível direto pelo browser.
+Dedicated bike computers are expensive and native apps require downloads and extensive permissions. The casual cyclist needs a lightweight, installable solution that works offline, accessible directly through the browser — without registration or additional hardware.
 
-### Solução
-Uma PWA instalável que roda no Chrome do Android, com interface de três telas navegáveis por swipe, velocímetro digital em tempo real e persistência local de recordes.
+### Proposed Solution
 
----
+An installable PWA built with Next.js that runs in Chrome on Android. It uses the Geolocation API to capture real-time speed data, displays session metrics, and maintains a local record of historical bests — all stored on-device, no account or backend required.
 
-## 2. Objetivos
+### Success Criteria
 
-| Objetivo | Métrica de sucesso |
+| KPI | Target |
 |---|---|
-| Exibir velocidade em tempo real | Latência < 2s após iniciar sessão |
-| Registrar recordes históricos | Dados persistem após fechar o app |
-| Funcionar como PWA instalável | Ícone na home screen, funciona offline |
-| Suporte a dark/light mode | Segue tema do sistema por padrão |
-| Suporte a i18n (PT/EN) | Todas as strings traduzidas |
+| Real-time speed display latency | < 2s after session starts |
+| Historical records persistence | Data persists after closing the app |
+| PWA installability | App icon on home screen, works offline |
+| Dark/light theme support | Follows system theme by default |
+| i18n coverage | 100% of strings translated (PT-BR / EN) |
+| GPS signal acquisition | Badge shows status within 1s of state change |
+| Touch target compliance | No interactive element smaller than 48×48px |
 
 ---
 
-## 3. Fora do Escopo (v1.0)
+## 2. User Experience & Functionality
 
-- Mapa/trajeto da rota
-- Gráfico de velocidade por sessão
-- Login e sincronização em nuvem *(planejado para v2)*
-- Customização de fonte/cor do velocímetro *(planejado para v2)*
-- Velocímetro analógico *(planejado para v2)*
-- Exportação de dados
+### User Personas
 
----
+**Primary — Casual Cyclist**
+Uses Android, rides recreationally 2–4x per week. Wants to track speed without installing a dedicated app. Not technically sophisticated. Uses the phone mounted on the handlebar, often with gloves, in full sun.
 
-## 4. Usuário-alvo
-
-Ciclista casual ou recreativo que usa Android e quer acompanhar sua velocidade sem instalar um app dedicado. Não requer cadastro, configuração técnica ou hardware adicional.
+**Secondary — Commuter Cyclist**
+Daily commuter who wants quick session data (avg/max speed, distance). Expects the app to just work — no setup, no accounts.
 
 ---
 
-## 5. Identidade Visual
+### User Stories & Acceptance Criteria
 
-| Atributo | Decisão |
-|---|---|
-| Nome | **Speedo** |
-| Domínio | `speedo.bike` |
-| Estilo | Minimalista utilitário |
-| Paleta | Preto, branco e tons de cinza |
-| Dark mode | Padrão — segue tema do sistema |
-| Fonte do velocímetro | Display numérica, peso heavy (ex: `Oswald`, `Barlow Condensed`, ou `Bebas Neue`) |
-| Animação da velocidade | Contagem suave estilo odômetro (framer-motion spring) |
+#### Onboarding — GPS Permission
 
-**Princípio visual:** interface que desaparece — o número de velocidade é o protagonista. Sem ornamentos desnecessários. Contraste alto para legibilidade ao sol.
+**Story:** As a first-time user, I want to grant GPS permission so the app can measure my speed.
 
-### Sistema de Temas
-
-O sistema de temas é implementado desde a v1 com **CSS variables semânticas** via shadcn/ui + Tailwind. Isso garante que paletas alternativas e customizações futuras sejam triviais de adicionar.
-
-#### Tokens CSS (globals.css)
-
-```css
-/* Light */
-:root {
-  --background:   0 0% 100%;      /* #ffffff */
-  --foreground:   0 0% 4%;        /* #0a0a0a */
-  --muted:        0 0% 96%;       /* #f5f5f5 */
-  --muted-foreground: 0 0% 45%;   /* #737373 */
-  --primary:      0 0% 4%;        /* #0a0a0a */
-  --primary-foreground: 0 0% 100%;
-  --border:       0 0% 90%;       /* #e5e5e5 */
-  --ring:         0 0% 4%;
-  --radius:       0.5rem;
-}
-
-/* Dark */
-.dark {
-  --background:   0 0% 4%;        /* #0a0a0a */
-  --foreground:   0 0% 100%;      /* #ffffff */
-  --muted:        0 0% 10%;       /* #1a1a1a */
-  --muted-foreground: 0 0% 55%;   /* #8c8c8c */
-  --primary:      0 0% 100%;      /* #ffffff */
-  --primary-foreground: 0 0% 4%;
-  --border:       0 0% 15%;       /* #262626 */
-  --ring:         0 0% 100%;
-}
-```
-
-#### Regras de uso
-
-- **Sempre usar classes semânticas** — nunca `text-white` ou `bg-black` diretamente
-- ✅ `text-foreground`, `bg-background`, `text-muted-foreground`, `border-border`
-- ❌ `text-white`, `bg-black`, `text-gray-400`
-- A única exceção são cores de estado: `text-green-500` (GPS OK), `text-yellow-500` (GPS fraco)
-
-#### ThemeProvider
-
-```
-providers/ThemeProvider.tsx
-```
-
-- Lê `prefers-color-scheme` na montagem e aplica classe `.dark` ou `.light` no `<html>`
-- Expõe `useTheme()` → `{ theme, setTheme }` via Context
-- `setTheme` aplica a classe imediatamente mas **não persiste** — ao fechar o app, reseta para o sistema
-- Compatível com shadcn/ui nativamente (sem config extra)
-
-#### Tailwind config
-
-```js
-// tailwind.config.ts
-darkMode: 'class'  // controle via classe .dark no <html>
-```
-
-#### Roadmap de temas (v2+)
-- Paleta "noturno" (vermelho escuro — melhor para olhos à noite)
-- Paleta "alto contraste" (para sol intenso)
-- Customização de cor de destaque do velocímetro pelo usuário
+**Acceptance Criteria:**
+- On first open, a permission screen is shown before the speedometer
+- Tapping "Allow GPS" triggers the native browser permission prompt
+- If granted: stores `gps_granted` in `localStorage` → opens speedometer normally
+- If denied: shows a blocking screen with instructions to enable it in browser settings + "Try again" button
+- If permanently denied: shows specific message directing user to open browser settings manually
+- The speedometer is **never** shown without GPS permission
 
 ---
 
-## 6. UI/UX — Contexto de Uso
+#### Speedometer — Real-Time Speed Display
 
-O app é usado **em movimento, ao ar livre, com o celular preso no guidão**. Isso define todas as decisões de UI.
+**Story:** As a cyclist, I want to see my current speed in large digits so I can read it at a glance while riding.
 
-### Contexto físico
-
-| Fator | Implicação |
-|---|---|
-| Tela ao sol | Contraste máximo, dark mode preferido, sem transparências frágeis |
-| Mãos com luvas | Toque com área ampla, sem elementos pequenos ou próximos |
-| Vibração do guidão | Sem interações que exijam precisão ou arrastar fino |
-| Atenção dividida | Leitura em < 1 segundo, hierarquia visual clara |
-| Orientação variável | Layout responsivo para portrait e landscape |
-
----
-
-### Touch Targets
-
-Todos os elementos interativos seguem as diretrizes mínimas:
-
-| Elemento | Tamanho mínimo |
-|---|---|
-| Botões de ação (Pausar, Fim) | `min-h-16` (64px) — toque com luva |
-| Botão de edição de métricas | `min-h-12 min-w-12` (48px) |
-| Toggles nas Settings | `min-h-12` com área de toque expandida |
-| Indicadores de página (dots) | `min-h-10 min-w-10` com padding invisível |
-| Checkboxes no edit mode | `min-h-12 min-w-12` |
-
-> Regra geral: nenhum elemento tocável menor que **48×48px**. Elementos críticos (pausar/retomar) chegam a **64px de altura**.
+**Acceptance Criteria:**
+- Speed is displayed as a large numeric value, centered on screen (`text-8xl` / `9xl` portrait, `text-7xl` landscape)
+- Font is a heavy display typeface (Bebas Neue or equivalent)
+- Speed updates with a smooth spring animation (framer-motion) — odometer style
+- Unit label (`km/h` or `mph`) displayed below the speed, smaller, with reduced opacity
+- GPS status badge displayed at the top: `Waiting…` / `Weak signal` / `OK`
+- If `coords.speed === null`, speed is calculated via Haversine between consecutive positions ÷ Δt
+- Layout adapts to portrait and landscape orientations
 
 ---
 
-### Espaçamento e Densidade
+#### Speedometer — Session Control
 
-- **Padding lateral:** `px-6` (24px) — nunca menos que 16px
-- **Gap entre métricas:** `gap-4` (16px) mínimo
-- **Margem entre velocidade e métricas:** `mt-8` (32px) — respiro visual
-- **Altura dos cards de métrica:** `h-20` (80px) — legível em movimento
-- **Fonte das métricas secundárias:** mínimo `text-lg` (18px), label em `text-xs` uppercase
+**Story:** As a cyclist, I want the session to start automatically when I start moving so I don't need to interact with the phone.
+
+**Acceptance Criteria:**
+- Session auto-starts when `coords.speed > 0.5 m/s` for the first time → state `RUNNING`
+- Session auto-pauses after `speed ≈ 0` for **10 consecutive seconds** → state `AUTO_PAUSED`
+- "Pause" button manually forces pause at any time → state `MANUALLY_PAUSED`
+- "Resume" button or new movement resumes the session → state `RUNNING`
+- "End" button opens a confirmation modal (shadcn Dialog) → saves session → resets metrics → state `IDLE`
+- State machine: `IDLE → RUNNING → AUTO_PAUSED ↔ RUNNING → IDLE`
 
 ---
 
-### Tipografia
+#### Speedometer — Secondary Metrics Carousel
 
-| Elemento | Fonte | Tamanho | Peso |
+**Story:** As a cyclist, I want to swipe through secondary metrics during my ride without leaving the speedometer screen.
+
+**Acceptance Criteria:**
+- Metrics displayed in pairs via an Embla Carousel (independent from the screen carousel)
+- Available metrics: Max Speed, Avg Speed, Movement Time, Total Time, Current Time, Distance, Altitude, Elevation Gain, Calories, GPS Coordinates
+- Default active: Max Speed + Avg Speed
+- User can enable/disable individual metrics via Settings or in-screen edit mode
+- Edit mode: pencil icon opens overlay with checkboxes per metric; confirms on outside tap or close
+- If active count is odd, last pair shows one metric centered
+- Metrics carousel uses `loop: false`; page indicator (dots) below
+
+---
+
+#### Speedometer — Focus Mode
+
+**Story:** As a cyclist, I want the app to go fullscreen when I'm riding so the speed number fills the screen.
+
+**Acceptance Criteria:**
+- Calls `document.documentElement.requestFullscreen()` automatically when session starts
+- Hides Android status bar → maximizes number display area
+- In focus mode: only speed, GPS badge, and control buttons visible
+- Tapping the screen once toggles between focus mode and normal mode
+- Exiting session (pause or end) automatically exits fullscreen
+
+---
+
+#### Speedometer — Speed Alert
+
+**Story:** As a cyclist, I want a vibration alert when I exceed my configured speed limit so I know without looking.
+
+**Acceptance Criteria:**
+- User configures a speed threshold in km/h in Settings (0 or empty = disabled)
+- When speed exceeds the threshold: `navigator.vibrate()` fires + pulsing visual highlight on the speed number (framer-motion keyframe loop)
+- Alert fires **once per crossing event** — does not repeat while above the limit
+- No audio alert — vibration + visual only
+
+---
+
+#### Session Recovery
+
+**Story:** As a cyclist, if the app closes accidentally during a session, I want to resume where I left off.
+
+**Acceptance Criteria:**
+- During an active session, state is saved to `localStorage` (`speedo:session_draft`) every 5 seconds
+- On app open, if `session_draft` exists, a recovery modal is shown with: elapsed time and distance
+- "Resume" → restores metrics, resumes in `MANUALLY_PAUSED` state
+- "Discard" → clears draft, starts fresh
+- `session_draft` is cleared on normal session end
+
+---
+
+#### Settings
+
+**Story:** As a user, I want to configure the app preferences so it works for my riding style and environment.
+
+**Acceptance Criteria:**
+
+| Setting | Type | Default | Behavior |
 |---|---|---|---|
-| Velocidade atual | Display numérica (Bebas Neue ou similar) | `text-8xl` / `9xl` portrait · `text-7xl` landscape | Heavy |
-| Unidade (km/h) | Mesma display, opacidade reduzida | `text-2xl` | Regular |
-| Valor das métricas | Monospace ou display | `text-2xl` | Semibold |
-| Label das métricas | Sans-serif | `text-xs` uppercase tracking-widest | Regular |
-| Botões | Sans-serif | `text-base` | Medium |
-| Settings | Sans-serif | `text-base` | Regular |
+| Theme (dark/light) | Toggle (shadcn Switch) | Follows system | Overrides while app is open; resets on close |
+| Units | Toggle | Metric (km/h, m) | Switches all displayed units |
+| Keep screen on | Toggle | Off | Calls `navigator.wakeLock.request('screen')` when enabled |
+| User weight | Numeric input | — (optional) | Used for calorie calculation |
+| Speed alert | Numeric input (km/h) | 0 (disabled) | Triggers alert when exceeded |
+| Language | Selector (PT / EN) | English | Overrides the app default language |
+
+- All settings use `inputmode="numeric"` for numeric fields
+- Wake Lock reactivates via `visibilitychange` on app return
+- Wake Lock shows a discrete warning if the browser API is unsupported
+- Settings minimum row height: 56px for easy tap
+- `Separator` between setting groups
 
 ---
 
-### Orientação de Tela
+#### Stats — Historical Records
 
-#### Portrait (padrão)
-```
-┌───────────────────┐
-│   [GPS badge]     │
-│                   │
-│       32.4        │  ← velocidade ocupa ~40% da altura
-│       km/h        │
-│                   │
-│  [Máx] │ [Méd]   │  ← métricas em 2 colunas
-│   ● ○ ○           │
-│                   │
-│ [Pausar]  [Fim]   │  ← botões full-width divididos
-└───────────────────┘
-```
+**Story:** As a cyclist, I want to see my all-time records so I can track my progress over time.
 
-#### Landscape
-```
-┌──────────────────────────────────────┐
-│  [GPS]                    [Pausar][Fim] │
-│                                        │
-│   32.4 km/h   │  [Máx]  │  [Méd]      │  ← layout 3 colunas
-│               │  41.2   │  28.7        │
-│               │  ● ○ ○  │             │
-└──────────────────────────────────────┘
-```
-
-- Em landscape, velocidade ocupa coluna esquerda (~50%), métricas ocupam direita
-- Botões migram para o topo direito como ícones compactos (`min-h-12`)
-- Fonte da velocidade reduz de `9xl` para `7xl` para caber na altura disponível
-- Usar `@media (orientation: landscape)` + classes Tailwind `landscape:`
+**Acceptance Criteria:**
+- Records stored globally in `localStorage` (`speedo:records`), updated on session end
+- Records displayed: Max Speed, Longest Distance, Longest Movement Time, Highest Calorie Burn (requires weight), Date of Last Record
+- Shows `—` for records with no data
+- "Reset records" button with confirmation modal (shadcn Dialog)
+- Portrait: linear card list; Landscape: 2×N grid
 
 ---
 
-### Legibilidade ao Sol
+### Non-Goals (v1.0)
 
-- **Dark mode:** fundo `#0a0a0a`, texto `#ffffff` — contraste máximo
-- **Light mode:** fundo `#ffffff`, texto `#0a0a0a`
-- **Sem gradientes** na área do velocímetro — aumentam dificuldade de leitura
-- **Sem opacidade reduzida** em dados críticos (velocidade, máx, méd)
-- Opacidade reduzida apenas em labels secundários (`opacity-50`)
-- Badge de GPS com cor sólida (verde/amarelo/cinza), sem outline frágil
-
----
-
-### Feedback Visual e Haptic
-
-| Evento | Feedback |
-|---|---|
-| Tap em botão | Scale down `0.95` via framer-motion (press feedback) |
-| Sessão iniciada | Pulso sutil no número de velocidade |
-| Auto-pause ativado | Número faz fade para `opacity-40` + badge "Pausado" |
-| Alerta de velocidade | Pulso de borda branca/vermelha + vibração |
-| Finalizar sessão | Modal com transição suave, fundo bloqueado |
-| Editar métricas | Cards ganham overlay com escala leve |
+- Route map / trajectory tracking
+- Per-session speed graphs
+- Login or cloud sync *(planned v2)*
+- Speedometer color/font customization *(planned v2)*
+- Analog speedometer *(planned v2)*
+- Data export
+- Session history list in the UI *(IndexedDB prepared in architecture but not exposed)*
 
 ---
 
-### Settings e Stats — Landscape
+## 3. Technical Specifications
 
-Ambas as telas funcionam em portrait e landscape. Em landscape:
-
-- Layout de **2 colunas** com scroll vertical em cada coluna
-- Settings: coluna esquerda com toggles, coluna direita com inputs numéricos
-- Stats: cards de recordes em grid 2×N em vez de lista linear
-- Usar `@media (orientation: landscape)` com classes `landscape:` do Tailwind
-
-### Settings — UX específico
-
-- Itens de setting com **altura mínima de 56px** para toque fácil
-- `Separator` entre grupos de configurações
-- Input de peso e alerta de velocidade com `inputmode="numeric"` (teclado numérico no mobile)
-- Labels descritivos + subtexto explicativo em `text-sm opacity-60`
-- Scroll vertical nativo — sem carrossel nesta tela
-- Toggle de tema **não persiste** ao fechar o app — sempre reseta para o tema do sistema
-
----
-
-## 7. Estados e Fluxos de Sistema
-
-### Permissão de GPS (Onboarding)
-
-Na **primeira abertura**, antes de mostrar o velocímetro, o app solicita permissão de GPS:
+### Architecture Overview
 
 ```
-┌─────────────────────────────┐
-│                             │
-│          [ ícone GPS ]      │
-│                             │
-│    Speedo precisa de acesso   │
-│    à sua localização para   │
-│    medir a velocidade.      │
-│                             │
-│    [ Permitir acesso GPS ]  │  ← abre prompt nativo do browser
-│                             │
-└─────────────────────────────┘
+GpsPermissionGate
+      ↓ (permission granted)
+AppShell (Embla Carousel — 3 screens, default: index 1)
+      │
+      ├── Screen 0: SettingsScreen
+      │     └── useSettings → lib/storage.ts (speedo:settings)
+      │
+      ├── Screen 1: SpeedometerScreen
+      │     ├── useGeolocation → Geolocation API (enableHighAccuracy: true)
+      │     ├── useSession (useReducer) → IDLE | RUNNING | AUTO_PAUSED | MANUALLY_PAUSED
+      │     ├── useMetrics → derived metrics in real-time
+      │     ├── useActiveMetrics → lib/storage.ts (speedo:settings)
+      │     ├── useSessionDraft → lib/storage.ts (speedo:session_draft) [every 5s]
+      │     └── useFocusMode → document.requestFullscreen()
+      │
+      └── Screen 2: StatsScreen
+            └── useRecords → lib/storage.ts (speedo:records)
+
+On session end:
+useSession → lib/storage.ts → update speedo:records
+                            → clear speedo:session_draft
 ```
 
-| Resultado | Comportamento |
-|---|---|
-| Usuário permite | Salva flag `gps_granted` no localStorage → abre speedometer normalmente |
-| Usuário nega | Exibe tela de bloqueio com mensagem explicativa + botão "Tentar novamente" + instrução de como habilitar nas configurações do browser |
-| Permissão negada permanentemente | Exibe mensagem específica orientando abrir as configurações do browser manualmente |
-
-> O app **não funciona sem GPS** — não faz sentido exibir o velocímetro com dados zerados. A tela de bloqueio substitui o app inteiro até a permissão ser concedida.
-
----
-
-### Sessão Interrompida (Recuperação)
-
-Se o usuário **fechar o app acidentalmente** com uma sessão ativa, ao reabrir:
-
-1. App detecta sessão em andamento salva no `localStorage` (`speedo:session_draft`)
-2. Exibe modal de recuperação:
+### Folder Structure
 
 ```
-┌─────────────────────────────┐
-│   Sessão em andamento       │
-│                             │
-│   Você tem uma sessão       │
-│   pausada:                  │
-│   • Tempo: 00:23:14         │
-│   • Distância: 8.4 km       │
-│                             │
-│  [ Retomar ]  [ Descartar ] │
-└─────────────────────────────┘
+src/
+├── app/
+│   ├── layout.tsx                  # Root layout (providers, metadata, PWA meta tags)
+│   ├── page.tsx                    # Entry point → <AppShell /> or <GpsPermissionGate />
+│   └── globals.css                 # CSS variables (--background, --foreground, etc.)
+│
+├── features/
+│   ├── speedometer/
+│   │   ├── components/
+│   │   │   ├── SpeedometerScreen.tsx
+│   │   │   ├── DigitalDisplay.tsx        # Animated speed number (framer-motion spring)
+│   │   │   ├── MetricsCarousel.tsx       # Inner Embla — metric pairs
+│   │   │   ├── MetricCard.tsx
+│   │   │   ├── MetricsEditMode.tsx
+│   │   │   ├── SessionControls.tsx
+│   │   │   ├── GpsStatus.tsx
+│   │   │   └── FocusMode.tsx
+│   │   ├── hooks/
+│   │   │   ├── useGeolocation.ts         # Geolocation API + Haversine fallback
+│   │   │   ├── useSession.ts             # useReducer — session state machine
+│   │   │   ├── useMetrics.ts             # Real-time derived metrics
+│   │   │   ├── useActiveMetrics.ts       # Active metrics list management
+│   │   │   ├── useSessionDraft.ts        # Persist/restore interrupted session
+│   │   │   └── useFocusMode.ts           # requestFullscreen + tap toggle
+│   │   ├── utils/
+│   │   │   ├── speed.ts                  # m/s → km/h → mph conversions
+│   │   │   ├── haversine.ts              # GPS distance calculation
+│   │   │   └── metrics.ts                # Metric value formatting
+│   │   └── types/index.ts                # SessionState, GpsStatus, MetricId, SpeedReading
+│   │
+│   ├── stats/
+│   │   ├── components/
+│   │   │   ├── StatsScreen.tsx
+│   │   │   ├── RecordCard.tsx
+│   │   │   └── ResetRecordsButton.tsx
+│   │   └── hooks/useRecords.ts
+│   │
+│   ├── settings/
+│   │   ├── components/
+│   │   │   ├── SettingsScreen.tsx
+│   │   │   ├── ToggleRow.tsx
+│   │   │   ├── NumberInputRow.tsx
+│   │   │   ├── MetricsToggleList.tsx
+│   │   │   └── LanguageSelector.tsx
+│   │   └── hooks/useSettings.ts
+│   │
+│   └── onboarding/
+│       ├── components/
+│       │   ├── GpsPermissionGate.tsx
+│       │   ├── GpsPermissionScreen.tsx
+│       │   └── GpsDeniedScreen.tsx
+│       └── hooks/useGpsPermission.ts
+│
+├── components/ui/
+│   ├── AppShell.tsx                  # Outer Embla — 3 screens
+│   ├── SlideIndicator.tsx            # Page dot indicators
+│   ├── Modal.tsx                     # Generic confirmation modal (shadcn Dialog)
+│   └── SessionRecoveryModal.tsx
+│
+├── hooks/
+│   ├── useWakeLock.ts                # Screen Wake Lock API + visibilitychange reactivation
+│   └── useOrientation.ts             # Returns 'portrait' | 'landscape'
+│
+├── lib/
+│   ├── storage.ts                    # Typed wrappers: getSettings/saveSettings, getRecords/saveRecords,
+│   │                                 # getSessionDraft/saveSessionDraft/clearSessionDraft
+│   └── calories.ts                   # MET × weight_kg × duration_hours
+│
+├── i18n/
+│   ├── locales/pt.json
+│   ├── locales/en.json
+│   └── config.ts
+│
+├── providers/
+│   ├── AppProviders.tsx              # ThemeProvider + IntlProvider
+│   └── ThemeProvider.tsx             # Reads prefers-color-scheme, exposes useTheme()
+│
+└── constants/index.ts                # AUTO_PAUSE_DELAY=10s, SESSION_DRAFT_INTERVAL=5s, MET=8.0
 ```
 
-3. **Retomar:** restaura métricas, retoma sessão em estado `MANUALLY_PAUSED`
-4. **Descartar:** limpa o draft, inicia do zero
+### Tech Stack
 
-> O `session_draft` é salvo a cada 5 segundos durante sessão ativa e apagado ao finalizar normalmente.
-
----
-
-### Tema
-
-| Situação | Comportamento |
-|---|---|
-| Primeira abertura | Segue `prefers-color-scheme` do sistema |
-| Toggle nas Settings ativado | Sobrescreve enquanto o app está aberto |
-| App fechado e reaberto | Volta a seguir o sistema (toggle não persiste) |
-
----
-
-### Modo Foco (Fullscreen)
-
-Ativado automaticamente ao iniciar uma sessão na tela do velocímetro:
-
-- Chama `document.documentElement.requestFullscreen()` ao iniciar sessão
-- Esconde barra de status do Android → mais espaço para o número
-- Exibe **apenas** a velocidade + badge GPS + botões de controle
-- Métricas secundárias e indicadores de página ficam ocultos no modo foco
-- Toque simples na tela alterna entre **modo foco** e **modo normal**
-- Ao pausar ou finalizar sessão, sai do fullscreen automaticamente
-
----
-
-## 8. Arquitetura de Navegação
-
-O app é composto por **3 telas** organizadas em sequência horizontal, navegáveis por **swipe (Embla Carousel)** ou toque nos indicadores de página.
-
-```
-[ Tela 1: Settings ] ←→ [ Tela 2: Velocímetro ] ←→ [ Tela 3: Stats ]
-```
-
-A tela padrão ao abrir o app é a **Tela 2 (Velocímetro)**.
-
----
-
-## 7. Telas
-
-### Tela 1 — Settings
-
-Configurações persistidas no `localStorage`.
-
-| Configuração | Tipo | Padrão |
-|---|---|---|
-| Tema (dark/light) | Toggle (shadcn Switch) | Segue sistema |
-| Unidades | Toggle | Métrico (km/h, m) |
-| Manter tela ligada | Toggle | Desligado |
-| Peso do usuário | Input numérico | — (opcional) |
-| Alerta de velocidade | Input numérico (km/h) | Desligado (0 = inativo) |
-| Idioma | Seletor (PT / EN) | Segue sistema |
-
-**Comportamento do alerta de velocidade:**
-- Usuário define um limite em km/h (ex: 30)
-- Ao ultrapassar o limite: vibração via `navigator.vibrate()` + destaque visual pulsante na velocidade (framer-motion)
-- **Sem som** — vibração + visual são suficientes
-- Alerta dispara **uma vez por evento** de ultrapassagem — não repete enquanto mantém acima do limite
-- `0` ou vazio = alerta desativado
-
-**Comportamento do Wake Lock:**
-- Ao ativar, chama `navigator.wakeLock.request('screen')`
-- Reativa automaticamente via `visibilitychange` ao retornar ao app
-- Exibe aviso discreto caso o browser não suporte a API
-
----
-
-### Tela 2 — Velocímetro
-
-Tela principal. Velocidade no centro, métricas secundárias abaixo em carrossel horizontal.
-
-#### Layout
-
-```
-┌─────────────────────────────┐
-│       [ GPS: OK ●  ]        │  ← badge de status no topo
-│                             │
-│           32.4              │  ← velocidade atual (fonte grande, centro)
-│           km/h              │  ← unidade abaixo, menor
-│                             │
-│  ╔══════════╦══════════╗    │
-│  ║ Máx      ║ Méd      ║    │  ← par de métricas ativo (swipe ←→)
-│  ║ 41.2     ║ 28.7     ║    │
-│  ╚══════════╩══════════╝    │
-│        ● ○ ○ ○ ○           │  ← indicador de página do carrossel
-│                             │
-│   [ ⏸ Pausar ]  [ ■ Fim ]  │  ← controles
-└─────────────────────────────┘
-```
-
-#### Métricas disponíveis
-
-Agrupadas em pares e navegadas por swipe horizontal (Embla Carousel independente do carrossel de telas). Cada métrica pode ser **ativada ou desativada** individualmente.
-
-| Métrica | Fonte de dado | Padrão |
-|---|---|---|
-| Velocidade máxima da sessão | Calculada em runtime | ✅ ativo |
-| Velocidade média da sessão | Distância ÷ tempo em movimento | ✅ ativo |
-| Tempo de movimento | Timer descontando pausas | ○ inativo |
-| Tempo total da sessão | Timer desde o início | ○ inativo |
-| Hora atual | `new Date()` | ○ inativo |
-| Distância percorrida | Haversine acumulado | ○ inativo |
-| Altitude atual | `coords.altitude` | ○ inativo |
-| Ganho de elevação | Acumulado quando altitude sobe | ○ inativo |
-| Calorias estimadas | MET × peso × tempo | ○ inativo |
-| Coordenadas GPS | `coords.latitude / longitude` | ○ inativo |
-
-> Se o número de métricas ativas for ímpar, o último par exibe a métrica sozinha centralizada.
-
-#### Onde gerenciar métricas ativas
-
-**1. Nas Settings (Tela 1):**
-Seção "Métricas do velocímetro" com lista de toggles (shadcn Switch) para cada métrica.
-
-**2. Direto na Tela 2 — modo de edição:**
-- Botão discreto (ícone ✏️) no canto da área de métricas
-- Ao tocar, entra em **edit mode**: cards com checkbox overlay
-- Usuário ativa/desativa sem sair da tela
-- Confirmação automática ao tocar fora ou fechar
-- Animação de entrada/saída via framer-motion
-
-#### Animações (framer-motion)
-
-| Elemento | Animação |
-|---|---|
-| Número de velocidade | Spring suave a cada novo valor (estilo odômetro) |
-| Transição RUNNING → PAUSED | Fade + leve scale down no número |
-| Alerta de velocidade | Pulso de cor na velocidade (keyframe loop) |
-| Badge GPS | AnimatePresence ao mudar status |
-| Swipe entre pares de métricas | Embla com drag livre |
-| Entrada no edit mode | Scale + fade nos overlays de checkbox |
-| Métrica ativada/desativada | AnimatePresence (entra/sai do carrossel) |
-
-#### Controle de sessão
-
-- **Auto-start:** `coords.speed > 0.5 m/s` pela primeira vez → inicia sessão automaticamente
-- **Auto-pause:** `speed ≈ 0` por **10 segundos consecutivos** → pausa automática
-- **Manual:** botão "Pausar / Retomar" força pausa ou retomada a qualquer momento
-- **Finalizar:** botão "Fim" abre modal de confirmação (shadcn Dialog) → salva sessão → reseta métricas
-
-#### Estados da sessão
-
-```
-IDLE → (speed > 0.5 m/s) → RUNNING → (speed ≈ 0 por 10s) → AUTO_PAUSED
-                               ↑                                    ↓
-                        (botão Retomar                     (botão Retomar
-                         ou movimento)                      ou movimento)
-
-RUNNING / AUTO_PAUSED / MANUALLY_PAUSED → (botão Fim confirmado) → IDLE
-```
-
-#### GPS e precisão
-
-- `enableHighAccuracy: true`, `distanceFilter: 0`
-- Status do GPS via Badge: `Aguardando…` / `Sinal fraco` / `OK`
-- Se `coords.speed === null` → calcula velocidade via Haversine entre posições consecutivas ÷ Δt
-
----
-
-### Tela 3 — Stats
-
-Recordes históricos globais acumulados ao longo de todas as sessões.
-
-| Recorde | Descrição |
-|---|---|
-| 🏆 Velocidade máxima | Maior `speed` já registrado (km/h) |
-| 📏 Maior distância | Sessão com maior distância percorrida |
-| ⏱ Maior tempo de movimento | Sessão mais longa |
-| 🔥 Maior gasto calórico | Requer peso configurado |
-| 📅 Data do último recorde | Timestamp da sessão mais recente |
-
-**Comportamento:**
-- Recordes atualizados ao **finalizar uma sessão**
-- Exibe `—` para recordes sem dados
-- Botão "Resetar recordes" com modal de confirmação (shadcn Dialog)
-
----
-
-## 8. Armazenamento Local
-
-| Dado | Storage | Chave |
-|---|---|---|
-| Configurações | `localStorage` | `speedo:settings` |
-| Recordes globais | `localStorage` | `speedo:records` |
-| Histórico de sessões *(v2)* | `IndexedDB` | `speedo:sessions` |
-
-> IndexedDB preparado na arquitetura da v1 para facilitar migração para nuvem na v2, mas não exposto na UI.
-
----
-
-## 9. Cálculo de Calorias
-
-```
-calorias = MET × peso_kg × duração_horas
-```
-
-- MET: `8.0` (ciclismo moderado ~20 km/h)
-- Requer peso preenchido nas Settings
-- Exibido apenas se peso estiver configurado
-
----
-
-## 10. Internacionalização (i18n)
-
-- Biblioteca: `next-intl`
-- Idiomas: **PT-BR** e **EN**
-- Detecção automática via `navigator.language`, fallback `en`
-- Usuário pode sobrescrever nas Settings
-- Strings, unidades e formatos de data/hora todos traduzidos
-
----
-
-## 11. PWA
-
-| Requisito | Detalhe |
-|---|---|
-| `manifest.json` | `name: "Speedo"`, `start_url: "https://speedo.bike"`, ícone, `display: standalone` |
-| Service Worker | Cache de assets estáticos (offline) |
-| Instalável | Prompt no Chrome Android |
-| Ícones | 192×192 e 512×512 |
-| `theme_color` | `#000000` (dark) / `#ffffff` (light) |
-
----
-
-## 12. Stack Técnica
-
-| Camada | Tecnologia |
+| Layer | Technology |
 |---|---|
 | Framework | Next.js 14+ (App Router) |
-| Linguagem | TypeScript |
-| Estilo | Tailwind CSS (`darkMode: 'class'`) |
-| Tokens de tema | CSS variables semânticas (shadcn/ui padrão) |
-| Componentes UI | shadcn/ui (Switch, Dialog, Badge, Button, Separator) |
-| Animações | framer-motion (spring no odômetro, AnimatePresence, layout animations) |
-| Navegação entre telas | Embla Carousel |
-| GPS | Geolocation API (nativa) |
-| Wake Lock | Screen Wake Lock API (nativa) |
+| Language | TypeScript |
+| Styling | Tailwind CSS (`darkMode: 'class'`) |
+| Theme tokens | CSS semantic variables (shadcn/ui standard) |
+| UI Components | shadcn/ui (Switch, Dialog, Badge, Button, Separator) |
+| Animations | framer-motion (spring, AnimatePresence, layout) |
+| Screen navigation | Embla Carousel (outer) |
+| Metric navigation | Embla Carousel (inner — independent instance) |
+| GPS | Geolocation API (native, `enableHighAccuracy: true`) |
+| Wake Lock | Screen Wake Lock API (native) |
 | i18n | next-intl |
-| Armazenamento | localStorage + idb (IndexedDB) |
+| Storage | localStorage + idb (IndexedDB — v2 ready) |
 | PWA | next-pwa |
 
----
+### Local Storage Schema
 
-## 13. Limitações Conhecidas
-
-| Limitação | Impacto | Mitigação |
+| Data | Storage | Key |
 |---|---|---|
-| `coords.speed` pode ser `null` | Velocidade não exibida | Fallback via Haversine |
-| Wake Lock sem suporte no Safari/Firefox | Tela pode apagar | Aviso ao usuário |
-| Browser suspende GPS ao minimizar | Sessão interrompida | Orientar manter app em foco |
-| GPS frio (~30s para adquirir sinal) | Velocidade zerada no início | Badge "Aguardando sinal…" |
+| Settings | `localStorage` | `speedo:settings` |
+| Global records | `localStorage` | `speedo:records` |
+| Session draft | `localStorage` | `speedo:session_draft` |
+| Session history *(v2)* | `IndexedDB` | `speedo:sessions` |
+
+### Theme System
+
+```css
+/* globals.css */
+:root {
+  --background:           0 0% 100%;   /* #ffffff */
+  --foreground:           0 0% 4%;     /* #0a0a0a */
+  --muted:                0 0% 96%;    /* #f5f5f5 */
+  --muted-foreground:     0 0% 45%;    /* #737373 */
+  --primary:              0 0% 4%;     /* #0a0a0a */
+  --primary-foreground:   0 0% 100%;
+  --border:               0 0% 90%;    /* #e5e5e5 */
+  --ring:                 0 0% 4%;
+  --radius:               0.5rem;
+}
+
+.dark {
+  --background:           0 0% 4%;     /* #0a0a0a */
+  --foreground:           0 0% 100%;   /* #ffffff */
+  --muted:                0 0% 10%;    /* #1a1a1a */
+  --muted-foreground:     0 0% 55%;    /* #8c8c8c */
+  --primary:              0 0% 100%;   /* #ffffff */
+  --primary-foreground:   0 0% 4%;
+  --border:               0 0% 15%;    /* #262626 */
+  --ring:                 0 0% 100%;
+}
+```
+
+**Rules:**
+- Always use semantic classes: `text-foreground`, `bg-background`, `border-border`
+- Never use: `text-white`, `bg-black`, `text-gray-400`
+- Exception: state colors — `text-green-500` (GPS OK), `text-yellow-500` (weak GPS)
+
+### UI Constraints (Physical Context)
+
+| Factor | Design Decision |
+|---|---|
+| Full sun readability | Dark mode default; no gradients on speedometer; max contrast |
+| Gloved hands | Min touch target 48×48px; critical buttons (pause/end) min 64px height |
+| Handlebar vibration | No precision gestures; swipe for navigation only |
+| Divided attention | Speed readable in < 1s; clear visual hierarchy |
+| Portrait + landscape | Responsive layout via `landscape:` Tailwind classes |
+
+### Typography
+
+| Element | Font | Size | Weight |
+|---|---|---|---|
+| Current speed | Bebas Neue (display) | `text-8xl/9xl` portrait · `text-7xl` landscape | Heavy |
+| Unit (km/h) | Same display | `text-2xl` | Regular |
+| Metric values | Monospace or display | `text-2xl` | Semibold |
+| Metric labels | Sans-serif | `text-xs` uppercase tracking-widest | Regular |
+| Buttons | Sans-serif | `text-base` | Medium |
+
+### Calorie Calculation
+
+```
+calories = MET × weight_kg × duration_hours
+```
+- MET: `8.0` (moderate cycling ~20 km/h)
+- Only calculated and displayed when weight is configured in Settings
+
+### PWA Requirements
+
+| Requirement | Detail |
+|---|---|
+| `manifest.json` | `name: "Speedo"`, `start_url: "https://speedo.bike"`, `display: standalone` |
+| Service Worker | Static asset caching (offline support) |
+| Icons | 192×192 and 512×512 |
+| `theme_color` | `#000000` (dark) / `#ffffff` (light) |
+| Installable | Chrome Android install prompt |
+
+### i18n
+
+- Library: `next-intl`
+- Languages: PT-BR, EN
+- Default language is `en`
+- User can switch to PT-BR in Settings
+- User can override in Settings
+- All strings, units, and date/time formats are translated
 
 ---
 
-## 14. Roadmap
+## 4. Risks & Roadmap
 
-### v1.0 — este documento
-- Velocímetro digital com velocidade atual, máxima e média
-- Métricas secundárias configuráveis em carrossel (10 opções)
-- Controle automático (10s) + manual de sessão
-- Recuperação de sessão interrompida
-- Recordes históricos locais
-- Settings completo (tema, unidades, wake lock, peso, alerta, idioma)
-- Onboarding com solicitação de permissão GPS
-- Tela de bloqueio se GPS negado
-- Modo foco (fullscreen) ao iniciar sessão
-- Tema segue sistema (toggle temporário nas settings)
-- Landscape em todas as telas
-- Identidade visual minimalista (P&B)
-- Sistema de temas com CSS variables semânticas (dark/light)
-- Animação de odômetro na velocidade
-- Alerta com vibração + destaque visual
-- PWA instalável, i18n PT/EN
+### Technical Risks
 
-### v2.0
-- Login e sincronização em nuvem
-- Histórico completo de sessões com lista
-- Mapa do trajeto (Mapbox ou Leaflet)
-- Gráfico de velocidade por sessão
+| Risk | Impact | Mitigation |
+|---|---|---|
+| `coords.speed` returns `null` | Speed not displayed | Haversine fallback: calculate from consecutive positions ÷ Δt |
+| Wake Lock not supported (Safari/Firefox) | Screen may turn off during ride | Warn user with a discrete in-app notice |
+| Browser suspends GPS when minimized | Session interrupted mid-ride | Instruct user to keep app in foreground; detect `visibilitychange` |
+| Cold GPS signal (~30s to acquire) | Zero speed at session start | Show `Waiting for signal…` badge; do not auto-start until signal acquired |
+| Embla carousel gesture conflicts | Inner + outer swipe conflicts | Use two fully independent Embla instances with correct drag detection boundaries |
+| `requestFullscreen` Safari restriction | Focus mode unavailable on iOS | iOS explicitly out of scope for v1; document limitation |
 
-### v3.0
-- Velocímetro analógico
-- Customização de cor de destaque e fonte do velocímetro
-- Múltiplos perfis de usuário
+### Phased Roadmap
+
+#### v1.0 — This Document
+- Real-time digital speedometer (current, max, avg speed)
+- 10 configurable secondary metrics in horizontal carousel
+- Automatic session control (10s auto-pause) + manual controls
+- Interrupted session recovery
+- Local historical records (5 record types)
+- Full Settings screen (theme, units, wake lock, weight, alert, language)
+- GPS permission onboarding + blocked state screen
+- Focus mode (fullscreen on session start)
+- Theme follows system (temporary toggle in Settings, no persistence)
+- Portrait + landscape layouts for all screens
+- Minimalist monochrome visual identity
+- Semantic CSS variable theme system (dark/light)
+- Odometer animation on speed number
+- Speed alert: vibration + visual pulse
+- Installable PWA, i18n PT-BR / EN
+
+#### v2.0
+- Login and cloud sync
+- Full session history with list UI
+- Route map (Mapbox or Leaflet)
+- Per-session speed graph
+
+#### v3.0
+- Analog speedometer
+- User-customizable accent color and font for speedometer
+- Multiple user profiles

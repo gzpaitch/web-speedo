@@ -171,5 +171,5 @@ useSession → lib/storage.ts → salva/atualiza speedo:records
 - **Regra de ouro:** sempre `text-foreground`, `bg-background`, `border-border` — nunca `text-white`, `bg-black`
 - **`lib/storage.ts`** exporta funções tipadas: `getSettings / saveSettings`, `getRecords / saveRecords`, `getSessionDraft / saveSessionDraft / clearSessionDraft`
 - **`AppShell`** inicia na posição `1` (índice da tela Speedometer)
-- **i18n** detecta `navigator.language`, fallback para `en`
+- **i18n** usa `en` como idioma padrão e permite troca para PT-BR nas configurações
 - **Inputs numéricos** usam `inputmode="numeric"` para abrir teclado numérico no mobile
